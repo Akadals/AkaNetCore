@@ -29,15 +29,16 @@ const char* AkaNetCore::Logger::LevelToString(LoggingLevel level)
 {
 	switch (level)
 	{
-	default: case LoggingLevel::LEVEL_UNKNOWN: return "[UNKNOWN] ";
-	case LoggingLevel::LEVEL_INFO: return "[INFO] ";
-	case LoggingLevel::LEVEL_DETAIL: return "[DETAIL] ";
-	case LoggingLevel::LEVEL_WARNING: return "[WARNING] ";
-	case LoggingLevel::LEVEL_ERROR: return "[ERROR] ";
+	default:
+	case LoggingLevel::LEVEL_UNKNOWN:	return "[UNKNOWN] ";
+	case LoggingLevel::LEVEL_INFO:		return "[INFO] ";
+	case LoggingLevel::LEVEL_DETAIL:	return "[DETAIL] ";
+	case LoggingLevel::LEVEL_WARNING:	return "[WARNING] ";
+	case LoggingLevel::LEVEL_ERROR:		return "[ERROR] ";
 	case LoggingLevel::LEVEL_EXCAPTION: return "[EXCAPTION] ";
-	case LoggingLevel::LEVEL_MESSAGE: return "[MESSAGE] ";
-	case LoggingLevel::LEVEL_CRASH: return "[CRASH] ";
-	case LoggingLevel::LEVEL_TRACE: return "[TRACE] ";
+	case LoggingLevel::LEVEL_MESSAGE:	return "[MESSAGE] ";
+	case LoggingLevel::LEVEL_CRASH:		return "[CRASH] ";
+	case LoggingLevel::LEVEL_TRACE:		return "[TRACE] ";
 	}
 }
 

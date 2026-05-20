@@ -24,6 +24,8 @@
 
 using namespace std;
 
+#define MAX_BUF_SIZE 0x800
+
 #define OPT_LOGGER_TIME_FORMAT 0
 #define OPT_LOGGER_ENABLE_FILE_OUTPUT 1
 #define OPT_LOGGER_FILE_OUTPUT_PATH 2

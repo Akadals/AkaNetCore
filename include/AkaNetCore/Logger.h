@@ -24,9 +24,14 @@
 #define PRINT_CRASH(message) Logger::EnqueueLog(LoggingLevel::LEVEL_CRASH,message)
 #define PRINT_TRACE(message) Logger::EnqueueLog(LoggingLevel::LEVEL_TRACE,message)
 
+#define DEFAULT_TIME_FORMAT "%Y-%m-%d %H:%M:%S"
+#define DEFAULT_ENABLE_FILE_OUTPUT false
+#define DEFAULT_OUTPUT_PATH "Log/"
+
 using namespace chrono;
 using namespace filesystem;
 
+using TIME_POINT = system_clock::time_point;
 
 namespace AkaNetCore
 {
@@ -38,16 +43,15 @@ namespace AkaNetCore
 	class Logger
 	{
 	public:
-		inline static const char* s_timeFormat = "%Y-%m-%d %H:%M:%S";
-		inline static bool s_enableFileOutput = false;
-		inline static path s_OutputPath = "Log/";
+		inline static const char*			s_timeFormat		= DEFAULT_TIME_FORMAT;
+		inline static bool					s_enableFileOutput	= DEFAULT_ENABLE_FILE_OUTPUT;
+		inline static path					s_OutputPath		= DEFAULT_OUTPUT_PATH;
 	private:
-		using TIME_POINT = system_clock::time_point;
-		inline static TIME_POINT s_now = system_clock::now();
-		inline static ofstream s_logFile;
-		inline static queue<const char*> s_logQueue;
-		inline static mutex s_mtx;
-		inline static thread s_worker;
+		inline static TIME_POINT			s_now = system_clock::now();
+		inline static ofstream				s_logFile;
+		inline static queue<const char*>	s_logQueue;
+		inline static mutex					s_mtx;
+		inline static thread				s_worker;
 	private:
 		static void UpdateCurrentTime();
 		static const char* GetTime();
