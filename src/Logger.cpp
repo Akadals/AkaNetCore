@@ -73,7 +73,7 @@ bool AkaNetCore::Logger::OpenLogFile()
 		if (!s_logFile.is_open())
 		{
 			auto msg = "Cannot open" + str + " file";
-			PRINT_EXCAPTION(msg.c_str());
+			PRINT_ERROR(msg.c_str());
 			PRINT_INFO("Automatically changes the s_enableFileOutput value to false.");
 			s_enableFileOutput = false;
 		}
@@ -85,32 +85,8 @@ void AkaNetCore::Logger::Startup()
 	if (s_enableFileOutput)
 	{
 		if (!OpenLogFile()) return;
-		if (s_worker.joinable())
-		{
-			PRINT_EXCAPTION("Startup has already run.");
-			return;
-		}
-
-		s_worker = thread(WriteThread);
+		if (!s_worker.joinable()) s_worker = thread(WriteThread);
 	}
-}
-
-void AkaNetCore::Logger::SetOpt(UINT8 opt, OptParam param)
-{
-	lock_guard<mutex> lock(s_mtx);
-	if (s_worker.joinable())
-	{
-		PRINT_EXCAPTION("SetOpt cannot be called after Startup");
-		return;
-	}
-	visit([&](auto&& v)
-		{
-		using T = decay_t<decltype(v)>;
-
-		if constexpr (is_same_v<T, const char*>) s_timeFormat = v;
-		else if constexpr (is_same_v<T, bool>) s_enableFileOutput = v;
-		else if constexpr (is_same_v<T, int>) s_loggingDepth = v;
-		}, param);
 }
 
 void AkaNetCore::Logger::EnqueueLog(LoggingLevel level, const char* message)

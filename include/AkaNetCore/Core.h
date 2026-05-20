@@ -18,8 +18,21 @@
 #define AKA_API
 #endif
 
+#include <variant>
+#include <type_traits>
+#include <utility> 
+
 using namespace std;
+
+#define OPT_LOGGER_TIME_FORMAT 0
+#define OPT_LOGGER_ENABLE_FILE_OUTPUT 1
+#define OPT_LOGGER_FILE_OUTPUT_PATH 2
 
 namespace AkaNetCore
 {
+	inline atomic<bool> g_running;
+
+	using OptParam = variant<const char*, bool, int>;
+
+	inline void SetOpt(UINT8 opt, OptParam param);
 }
