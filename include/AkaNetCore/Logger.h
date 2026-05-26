@@ -36,9 +36,6 @@ namespace AkaNetCore
 	};
 	namespace Logger
 	{
-		std::string GetTimeStr();
-		std::string LevelToString(LoggingLevel level);
-
 		bool OpenLogFile();
 		void StartWrite();
 		void EnqueueLog(LoggingLevel level, std::string message);

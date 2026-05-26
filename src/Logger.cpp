@@ -1,20 +1,29 @@
 #include <AkaNetCore/Logger.h>
 #include <AkaNetCore/Opt.h>
-#include "Internal.h"
 #include <Version.h>
+#include "Internal.h"
 
-#define DEFAULT_LOGGING_LEVEL 1
+#define DEFAULT_LOGGING_LEVEL 2
 #define DEFAULT_TIME_FORMAT "%Y-%m-%d %H:%M:%S"
 #define DEFAULT_ENABLE_FILE_OUTPUT false
+#define DEFAULT_ENABLE_COLORED true
 #define DEFAULT_OUTPUT_PATH std::filesystem::path("Log/")
 
 namespace
 {
+	enum Color : uint8_t
+	{
+		BLACK, BLUE, GREEN, CYAN, RED, MAGENTA, BROWN,
+		LIGHTGRAY, DARKGRAY, LIGHTBLUE, LIGHTGREEN,
+		LIGHTCYAN, LIGHTRED, LIGHTMAGENTA, YELLOW, WHITE
+	};
+
 	int						g_loggingLevel		= DEFAULT_LOGGING_LEVEL;
 
 	std::string				g_timeFormat		= DEFAULT_TIME_FORMAT;
 	std::filesystem::path	g_outputPath		= DEFAULT_OUTPUT_PATH;
 	bool					g_enableOutput		= DEFAULT_ENABLE_FILE_OUTPUT;
+	bool					g_enableColored		= DEFAULT_ENABLE_COLORED;
 
 	std::ofstream			g_outputFile;
 
@@ -23,14 +32,14 @@ namespace
 
 	std::mutex				g_mtx;
 }
-void AkaNetCore::Internal::Logger::SetOptValueImpl(uint8_t opt, const void* param, const std::type_info& type)
+void AkaNetCore::Internal::Logger::SetOptValueImpl(unsigned int opt, const void* param, const std::type_info& type)
 {
 	switch (opt)
 	{
 	case OPT_LOGGER_TIME_FORMAT:
 	{
 		g_timeFormat = *static_cast <const std::string*>(param);
-		PRINT_INFO(std::string("OPT_LOGGER_TIME_FORMAT has been set to ") + g_timeFormat);
+		PRINT_DETAIL(std::string("OPT_LOGGER_TIME_FORMAT has been set to ") + g_timeFormat);
 		break;
 	}
 	case OPT_LOGGER_ENABLE_FILE_OUTPUT:
@@ -39,7 +48,7 @@ void AkaNetCore::Internal::Logger::SetOptValueImpl(uint8_t opt, const void* para
 		else
 		{
 			g_enableOutput = *static_cast<const bool*>(param);
-			PRINT_INFO(std::string("OPT_LOGGER_ENABLE_FILE_OUTPUT has been set to ") + (g_enableOutput ? "true" : "false"));
+			PRINT_DETAIL(std::string("OPT_LOGGER_ENABLE_FILE_OUTPUT has been set to ") + (g_enableOutput ? "true" : "false"));
 		}
 		break;
 	}
@@ -49,7 +58,7 @@ void AkaNetCore::Internal::Logger::SetOptValueImpl(uint8_t opt, const void* para
 		else
 		{
 			g_outputPath = *static_cast<const std::filesystem::path*>(param);
-			PRINT_INFO(std::string("OPT_LOGGER_FILE_OUTPUT_PATH has been set to ") + g_outputPath.string());
+			PRINT_DETAIL(std::string("OPT_LOGGER_FILE_OUTPUT_PATH has been set to ") + g_outputPath.string());
 		}
 		break;
 	}
@@ -57,12 +66,25 @@ void AkaNetCore::Internal::Logger::SetOptValueImpl(uint8_t opt, const void* para
 	{
 		g_loggingLevel = *static_cast<const int*>(param);
 		if (g_loggingLevel > 0)
-			PRINT_INFO(std::string("OPT_LOGGER_LOGGING_LEVEL has been set to ") + std::to_string(g_loggingLevel));
+			PRINT_DETAIL(std::string("OPT_LOGGER_LOGGING_LEVEL has been set to ") + std::to_string(g_loggingLevel));
+		break;
+	}
+	case OPT_LOGGER_ENABLE_COLORED:
+	{
+		g_enableColored = *static_cast<const bool*>(param);
+		PRINT_DETAIL(std::string("OPT_LOGGER_ENABLE_COLORED has been set to ") + (g_enableColored ? "true" : "false"));
+		break;
 	}
 	}
 }
 
-std::string AkaNetCore::Logger::GetTimeStr()
+void AkaNetCore::Internal::Logger::SetColor(uint8_t color)
+{
+	if (!g_enableColored) return;
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), static_cast<WORD>(color));
+}
+
+std::string AkaNetCore::Internal::Logger::GetTimeStr()
 {
 	auto now = std::chrono::system_clock::now();
 
@@ -80,20 +102,37 @@ std::string AkaNetCore::Logger::GetTimeStr()
 	return oss.str();
 }
 
-std::string AkaNetCore::Logger::LevelToString(LoggingLevel level)
+std::string AkaNetCore::Internal::Logger::LevelToString(LoggingLevel level)
 {
 	switch (level)
 	{
 	default:
-	case LoggingLevel::LEVEL_UNKNOWN:	return "[ UNKNOWN ] ";
-	case LoggingLevel::LEVEL_INFO:		return "[ INFO ] ";
-	case LoggingLevel::LEVEL_DETAIL:	return "[ DETAIL ] ";
-	case LoggingLevel::LEVEL_WARNING:	return "[ WARNING ] ";
-	case LoggingLevel::LEVEL_ERROR:		return "[ ERROR ] ";
-	case LoggingLevel::LEVEL_EXCAPTION: return "[ EXCAPTION ] ";
-	case LoggingLevel::LEVEL_MESSAGE:	return "[ MESSAGE ] ";
-	case LoggingLevel::LEVEL_CRASH:		return "[ CRASH ] ";
-	case LoggingLevel::LEVEL_TRACE:		return "[ TRACE ] ";
+	case LoggingLevel::LEVEL_UNKNOWN:	return "UNKNOWN";
+	case LoggingLevel::LEVEL_INFO:		return "INFO";
+	case LoggingLevel::LEVEL_DETAIL:	return "DETAIL";
+	case LoggingLevel::LEVEL_WARNING:	return "WARNING";
+	case LoggingLevel::LEVEL_ERROR:		return "ERROR";
+	case LoggingLevel::LEVEL_EXCAPTION: return "EXCAPTION";
+	case LoggingLevel::LEVEL_MESSAGE:	return "MESSAGE";
+	case LoggingLevel::LEVEL_CRASH:		return "CRASH";
+	case LoggingLevel::LEVEL_TRACE:		return "TRACE";
+	}
+}
+
+uint8_t AkaNetCore::Internal::Logger::LevelToColor(LoggingLevel level)
+{
+	switch (level)
+	{
+	default:
+	case LoggingLevel::LEVEL_UNKNOWN:	return WHITE;
+	case LoggingLevel::LEVEL_INFO:		return LIGHTGREEN;
+	case LoggingLevel::LEVEL_DETAIL:	return LIGHTBLUE;
+	case LoggingLevel::LEVEL_WARNING:	return YELLOW;
+	case LoggingLevel::LEVEL_ERROR:		return LIGHTRED;
+	case LoggingLevel::LEVEL_EXCAPTION: return RED;
+	case LoggingLevel::LEVEL_MESSAGE:	return LIGHTMAGENTA;
+	case LoggingLevel::LEVEL_CRASH:		return BLUE;
+	case LoggingLevel::LEVEL_TRACE:		return CYAN;
 	}
 }
 
@@ -129,7 +168,7 @@ bool AkaNetCore::Logger::OpenLogFile()
 
 	if (!g_outputFile.is_open())
 	{
-		PRINT_ERROR("Cannot open " + str + " file");
+		PRINT_EXCAPTION("Cannot open " + str + " file");
 		PRINT_INFO("Automatically changes the s_enableFileOutput value to false.");
 		SetOpt(OPT_LOGGER_ENABLE_FILE_OUTPUT, false);
 	}
@@ -148,11 +187,23 @@ void AkaNetCore::Logger::StartWrite()
 void AkaNetCore::Logger::EnqueueLog(LoggingLevel level, std::string message)
 {
 	if (g_loggingLevel == 0) return;
+	if (g_loggingLevel < 2 && level == LoggingLevel::LEVEL_DETAIL) return;
+
 	std::lock_guard<std::mutex> lock(g_mtx);
 
-	std::string msg = GetTimeStr() + LevelToString(level) + message + '\n';
+	std::string timeStr = Internal::Logger::GetTimeStr();
+	std::string levelStr = Internal::Logger::LevelToString(level);
+
+	std::string msg = timeStr + levelStr + message + '\n';
 	g_logQueue.push(msg);
-	fputs(msg.data(), stdout);
+	fputs(timeStr.data(), stdout);
+	fputs("[ ", stdout);
+	Internal::Logger::SetColor(Internal::Logger::LevelToColor(level));
+	fputs(levelStr.data(), stdout);
+	Internal::Logger::SetColor(LIGHTGRAY);
+	fputs(" ] ", stdout);
+	fputs(message.data(), stdout);
+	fputc('\n', stdout);
 }
 
 void AkaNetCore::Logger::PrintAllInfo()
@@ -210,7 +261,7 @@ unsigned __stdcall AkaNetCore::Logger::WriteThread(PVOID arg)
 		for (auto& v : logs) g_outputFile << v;
 
 		g_outputFile.flush();
-		Sleep(1);
+		Sleep(100);
 	}
 	g_outputFile.close();
 	CloseHandle(g_worker);

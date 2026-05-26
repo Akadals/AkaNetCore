@@ -7,9 +7,20 @@ namespace AkaNetCore
 	{
 		namespace Logger
 		{
-			void SetOptValueImpl(uint8_t opt, const void* param, const std::type_info& type);
+			void SetColor(uint8_t color);
+			std::string GetTimeStr();
+			std::string LevelToString(LoggingLevel level);
+			uint8_t LevelToColor(LoggingLevel level);
+			void SetOptValueImpl(unsigned int opt, const void* param, const std::type_info& type);
 			template<typename T>
-			inline void SetOptValue(uint8_t opt, const T& param)
+			inline void SetOptValue(unsigned int opt, const T& param)
+			{ SetOptValueImpl(opt, &param, typeid(T)); }
+		}
+		namespace Test
+		{
+			void SetOptValueImpl(unsigned int opt, const void* param, const std::type_info& type);
+			template<typename T>
+			inline void SetOptValue(unsigned int opt, const T& param)
 			{ SetOptValueImpl(opt, &param, typeid(T)); }
 		}
 	}

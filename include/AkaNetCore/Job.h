@@ -11,7 +11,7 @@ namespace AkaNetCore
 	{
 	public:
 		std::vector<char>	data = {};
-		uint32_t		header = NULL;
+		uint32_t			header = NULL;
 	public:
 		Job();
 		void Init() override;
