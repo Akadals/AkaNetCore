@@ -2,10 +2,10 @@
 #include <filesystem>
 
 #define OPT_LOGGER_TIME_FORMAT				((unsigned int)1 << 0)
-#define OPT_LOGGER_ENABLE_FILE_OUTPUT		((unsigned int)1 << 1)
-#define OPT_LOGGER_FILE_OUTPUT_PATH			((unsigned int)1 << 2)
-#define OPT_LOGGER_LOGGING_LEVEL			((unsigned int)1 << 3)
-#define OPT_LOGGER_ENABLE_COLORED			((unsigned int)1 << 4)
+#define OPT_LOGGER_ENABLE_COLORED			((unsigned int)1 << 1)
+#define OPT_LOGGER_ENABLE_FILE_OUTPUT		((unsigned int)1 << 2)
+#define OPT_LOGGER_FILE_OUTPUT_PATH			((unsigned int)1 << 3)
+#define OPT_LOGGER_LOGGING_LEVEL			((unsigned int)1 << 4)
 
 /*
 #======================Option Type Requirements=====================#

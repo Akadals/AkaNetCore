@@ -195,7 +195,7 @@ void AkaNetCore::Logger::EnqueueLog(LoggingLevel level, std::string message)
 	std::string levelStr = Internal::Logger::LevelToString(level);
 
 	std::string msg = timeStr + levelStr + message + '\n';
-	g_logQueue.push(msg);
+
 	fputs(timeStr.data(), stdout);
 	fputs("[ ", stdout);
 	Internal::Logger::SetColor(Internal::Logger::LevelToColor(level));
@@ -204,6 +204,12 @@ void AkaNetCore::Logger::EnqueueLog(LoggingLevel level, std::string message)
 	fputs(" ] ", stdout);
 	fputs(message.data(), stdout);
 	fputc('\n', stdout);
+
+	if (!(g_running && !g_enableOutput)) g_logQueue.push(msg);
+	else
+	{
+		while (!g_logQueue.empty()) g_logQueue.pop();
+	}
 }
 
 void AkaNetCore::Logger::PrintAllInfo()

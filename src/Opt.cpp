@@ -5,8 +5,8 @@
 void AkaNetCore::SetOpt(unsigned int opt, bool param)
 {
 	auto ALLOW_FLAGS = 
-		OPT_LOGGER_ENABLE_FILE_OUTPUT |
-		OPT_LOGGER_ENABLE_COLORED;
+		OPT_LOGGER_ENABLE_COLORED |
+		OPT_LOGGER_ENABLE_FILE_OUTPUT;
 
 	if (opt & ~ALLOW_FLAGS)
 	{
@@ -14,10 +14,10 @@ void AkaNetCore::SetOpt(unsigned int opt, bool param)
 		return;
 	}
 
-	if (opt & OPT_LOGGER_ENABLE_FILE_OUTPUT)
-		Internal::Logger::SetOptValue(OPT_LOGGER_ENABLE_FILE_OUTPUT, param);
 	if (opt & OPT_LOGGER_ENABLE_COLORED)
 		Internal::Logger::SetOptValue(OPT_LOGGER_ENABLE_COLORED, param);
+	if (opt & OPT_LOGGER_ENABLE_FILE_OUTPUT)
+		Internal::Logger::SetOptValue(OPT_LOGGER_ENABLE_FILE_OUTPUT, param);
 }
 
 void AkaNetCore::SetOpt(unsigned int opt, std::filesystem::path param)
