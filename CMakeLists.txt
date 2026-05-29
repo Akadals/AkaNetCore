@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.20)
 
 project(
     AkaNetCore
-    VERSION 0.4.2
+    VERSION 0.5.0
     LANGUAGES CXX
 )
-set(AKANETCORE_VERSION_TAG "alpha")
+set(AKANETCORE_VERSION_TAG "dev")
 string(TIMESTAMP BUILD_DATE "%Y-%m-%d")
 
 configure_file(
