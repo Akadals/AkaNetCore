@@ -1,7 +1,7 @@
 #pragma once
-#include <AkaNetCore/Platform/Win32/Core.h>
-#include <AkaNetCore/Platform/Win32/IOContext.h>
-#include <AkaNetCore/Platform/Win32/Session.h>
+#include <AkaNetCore/Core.h>
+#include <AkaNetCore/IOContext.h>
+#include <AkaNetCore/Session.h>
 
 #ifndef INCL_ACCEPT_MODULE
 #define INCL_ACCEPT_MODULE

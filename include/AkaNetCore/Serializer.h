@@ -1,5 +1,4 @@
-#include <AkaNetCore/Platform/Win32/Core.h>
-
+#include <AkaNetCore/Core.h>
 namespace AkaNetCore
 {
 	class Serializer

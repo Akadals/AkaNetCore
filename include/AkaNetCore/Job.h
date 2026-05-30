@@ -1,6 +1,6 @@
 #pragma once
-#include <AkaNetCore/Platform/Win32/Core.h>
-#include <AkaNetCore/Platform/Win32/LockFreePool.h>
+#include <AkaNetCore/Core.h>
+#include <AkaNetCore/LockFreePool.h>
 
 #include <vector>
 

@@ -1,4 +1,4 @@
-#include <AkaNetCore/Platform/Win32/Job.h>
+#include <AkaNetCore/Job.h>
 
 AkaNetCore::Job::Job()
 {

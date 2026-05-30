@@ -1,4 +1,4 @@
-#include <AkaNetCore/Platform/Win32/Serializer.h>
+#include <AkaNetCore/Serializer.h>
 
 template<typename T>
 char* AkaNetCore::Serializer::Serialize(const T& data)

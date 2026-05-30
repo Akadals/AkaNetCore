@@ -1,4 +1,4 @@
-#include <AkaNetCore/Platform/Win32/RingBuffer.h>
+#include <AkaNetCore/RingBuffer.h>
 
 AkaNetCore::RingBuffer::RingBuffer(size_t size)
 {

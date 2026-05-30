@@ -1,8 +1,7 @@
 #include <iostream>
-#include <AkaNetCore/Platform/Win32/AkaNetCore.h>
-
+#include <AkaNetCore/AkaNetCore.h>
 #define AKANETCORE_USE_ACCEPT_EX_STRATEGY
-#include <AkaNetCore/Platform/Win32/Module.h>
+#include <AkaNetCore/Module.h>
 
 
 using namespace AkaNetCore;

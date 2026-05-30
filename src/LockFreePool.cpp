@@ -1,4 +1,4 @@
-#include <AkaNetCore/Platform/Win32/LockFreePool.h>
+#include <AkaNetCore/LockFreePool.h>
 
 template<typename T> AkaNetCore::LockFreePool<T>::LockFreePool()
 {
