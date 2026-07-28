@@ -1,0 +1,18 @@
+add_executable(LyntraNetTests
+    QueueTest.cpp
+ )
+
+target_link_libraries(LyntraNetTests
+    PRIVATE
+        LyntraNet
+)
+
+target_include_directories(LyntraNetTests
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_test(
+    NAME LyntraNetTests
+    COMMAND LyntraNetTests
+)

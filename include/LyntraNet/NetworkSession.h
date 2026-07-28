@@ -6,6 +6,8 @@
 #include <mutex>
 #include <atomic>
 
+using namespace LyntraNet::Utility;
+
 namespace LyntraNet::Session
 {
 	typedef class NetworkSession 
@@ -24,7 +26,7 @@ namespace LyntraNet::Session
 		Packet::RingBuffer m_recvBuf = { RECV_BUF_SIZE };
 		Packet::RingBuffer m_sendBuf = { SEND_BUF_SIZE };
 
-		Utility::LockFreeQueue<Packet::IOCONTEXT> m_ioContext = {};
+		LockFreePool<Packet::IOCONTEXT> m_ioContext = { IO_CONTEXT_POOL_SIZE };
 
 		alignas(64) std::atomic <DWORD> m_ioCount = 0x80000000;
 		alignas(64) DWORD m_ioFlag = 0;

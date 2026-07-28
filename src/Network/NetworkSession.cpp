@@ -22,7 +22,8 @@ DWORD NetworkSession::Read()
 		m_recvBuf.AcquireWriteRegion();
 	if (region.Empty()) return 0;
 
-	auto ctx = m_ioContext.Dequeue();
+	Packet::PIOCONTEXT ctx;
+	m_ioContext.Dequeue(ctx);
 	ctx->Init();
 
 	memset(&ctx->m_overlapped, 0, sizeof(OVERLAPPED));
