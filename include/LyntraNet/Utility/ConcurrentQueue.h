@@ -1,5 +1,10 @@
+#ifndef __INCL_CONCURRENT_QUEUE_H__
+#define __INCL_CONCURRENT_QUEUE_H__
+
 #include "ConcurrentPolicy.h"
 #include <atomic>
+#include <memory>
+
 
 namespace LyntraNet::Utility
 {
@@ -60,4 +65,8 @@ namespace LyntraNet::Utility
 }
 
 #include "Detail/ConcurrentQueue/ConcurrentQueueSPSC.inl"
+#include "Detail/ConcurrentQueue/ConcurrentQueueMPSC.inl"
+#include "Detail/ConcurrentQueue/ConcurrentQueueSPMC.inl"
 #include "Detail/ConcurrentQueue/ConcurrentQueueMPMC.inl"
+
+#endif

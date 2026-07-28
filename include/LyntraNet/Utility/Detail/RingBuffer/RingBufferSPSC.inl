@@ -9,7 +9,7 @@ RingBuffer<SPSC>::RingBuffer<SPSC>(size_t _size)
 	m_buffer = std::make_unique<std::byte[]>(m_capacity);
 }
 
-bool RingBuffer<SPSC>::Push(const std::byte* __restrict _dest, size_t _len)
+bool RingBuffer<SPSC>::Push(const std::byte* __restrict _src, size_t _len)
 {
 	if (!_len) return true;
 
@@ -29,8 +29,8 @@ bool RingBuffer<SPSC>::Push(const std::byte* __restrict _dest, size_t _len)
 	size_t resume = m_capacity - idx;
 	size_t first = _len < resume ? _len : resume;
 
-	memcpy(&m_buffer[idx], _dest, first);
-	memcpy(&m_buffer[0], _dest + first, _len - first);
+	memcpy(&m_buffer[idx], _src, first);
+	memcpy(&m_buffer[0], _src + first, _len - first);
 
 	m_tail.store(t + _len, std::memory_order_release);
 

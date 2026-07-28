@@ -1,4 +1,4 @@
-#include "LyntraNet/NetworkSession.h"
+#include "LyntraNet/Session/NetworkSession.h"
 
 using namespace LyntraNet::Session;
 
@@ -22,8 +22,7 @@ DWORD NetworkSession::Read()
 		m_recvBuf.AcquireWriteRegion();
 	if (region.Empty()) return 0;
 
-	Packet::PIOCONTEXT ctx;
-	m_ioContext.Dequeue(ctx);
+	auto ctx = m_ioContext.Acquire();
 	ctx->Init();
 
 	memset(&ctx->m_overlapped, 0, sizeof(OVERLAPPED));

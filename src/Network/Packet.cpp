@@ -8,7 +8,7 @@ RingBuffer::RingBuffer(size_t _size)
 	while (cap < _size) cap <<= 1;
 
 	m_mask = (m_capacity = cap) - 1;
-	m_buf.resize(m_capacity);
+	m_buf = std::make_unique<char[]>(m_capacity);
 }
 
 void LyntraNet::Packet::IOContext::Init()

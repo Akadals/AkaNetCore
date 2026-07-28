@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __INCL_LYNTRA_CONCURRENT_POLICY_H__
+#define __INCL_LYNTRA_CONCURRENT_POLICY_H__
 #include <concepts>
 
 struct SPSC {}; // Single-Producer Single-Consumer
@@ -12,3 +13,5 @@ std::same_as<T, SPSC> ||
 std::same_as<T, MPSC> ||
 std::same_as<T, SPMC> ||
 std::same_as<T, MPMC>;
+
+#endif

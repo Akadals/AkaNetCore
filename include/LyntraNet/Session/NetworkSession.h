@@ -1,5 +1,8 @@
-#include "Utility.h"
-#include "Packet.h"
+#ifndef __INCL_LYNTRA_NETWORK_SESSION_H__
+#define __INCL_LYNTRA_NETWORK_SESSION_H__
+
+#include "../Utility.h"
+#include "../Packet.h"
 
 #include <WinSock2.h>
 #include <WS2tcpip.h>
@@ -12,6 +15,7 @@ namespace LyntraNet::Session
 {
 	typedef class NetworkSession 
 		NET_SESSION, * PNET_SESSION;
+
 	class alignas(64) NetworkSession
 	{
 	public:
@@ -44,3 +48,4 @@ namespace LyntraNet::Session
 		void Parse(Packet::HEADER _header);
 	};
 }
+#endif

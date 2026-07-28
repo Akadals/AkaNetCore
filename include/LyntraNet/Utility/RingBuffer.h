@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __INCL_LYNTRA_RING_BUFFER_H__
+#define __INCL_LYNTRA_RING_BUFFER_H__
+
 #include "ConcurrentPolicy.h"
 #include <atomic>
 #include <memory>
@@ -21,7 +23,7 @@ namespace LyntraNet::Utility
 		alignas(64) mutable std::atomic<size_t> m_tail = 0;
 	public:
 		RingBuffer<SPSC>(size_t _size);
-		bool Push(const std::byte* __restrict _dest, size_t _len);
+		bool Push(const std::byte* __restrict _src, size_t _len);
 		bool Pop(std::byte* __restrict _dest, size_t _len);
 		bool Peek(std::byte* __restrict _dest, size_t _len) const;
 		size_t Size() const;
@@ -46,7 +48,6 @@ namespace LyntraNet::Utility
 	class RingBuffer<SPMC>
 	{
 	private:
-
 		size_t m_capacity;
 		size_t m_mask;
 
@@ -81,3 +82,4 @@ namespace LyntraNet::Utility
 #include "Detail/RingBuffer/RingBufferMPSC.inl"
 #include "Detail/RingBuffer/RingBufferSPMC.inl"
 #include "Detail/RingBuffer/RingBufferMPMC.inl"
+#endif

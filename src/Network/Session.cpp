@@ -1,4 +1,4 @@
-#include <LyntraNet/Session.h>
+#include <LyntraNet/Session/Session.h>
 
 using namespace LyntraNet::Session;
 

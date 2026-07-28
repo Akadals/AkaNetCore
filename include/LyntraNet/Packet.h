@@ -1,3 +1,7 @@
+#ifndef __INCL_LYNTRA_PACKET_H__
+#define __INCL_LYNTRA_PACKET_H__
+
+#include <winsock2.h>
 #include <atomic>
 #include <vector>
 
@@ -96,7 +100,7 @@ namespace LyntraNet::Packet
 				readableSize(_readableSize) {}
 		};
 	private:
-		std::vector<char> m_buf;
+		std::unique_ptr<char[]> m_buf;
 
 		size_t m_capacity = 0;
 		size_t m_mask = 0;
@@ -113,3 +117,4 @@ namespace LyntraNet::Packet
 		void CommitRead(size_t _size);
 	};
 }
+#endif

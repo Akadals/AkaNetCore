@@ -1,7 +1,10 @@
-#include "Utility/RingBuffer.h"
-#include "Utility/ConcurrentQueue.h"
+#ifndef __INCL_LYNTRA_UTLITY_H__
+#define __INCL_LYNTRA_UTLITY_H__
 
 #include "Utility/ConcurrentPolicy.h"
 
-template<typename T>
-using LockFreePool = LyntraNet::Utility::ConcurrentQueue<T, MPMC>;
+#include "Utility/RingBuffer.h"
+#include "Utility/ConcurrentQueue.h"
+#include "Utility/LockFreePool.h"
+
+#endif

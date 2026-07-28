@@ -1,3 +1,6 @@
+#ifndef __INCL_LYNTRA_SESSION_H__
+#define __INCL_LYNTRA_SESSION_H__
+
 #include "NetworkSession.h"
 
 namespace LyntraNet::Session
@@ -22,3 +25,4 @@ namespace LyntraNet::Session
 		const char* GetNickname() const { return m_nickname; }
 	};
 }
+#endif
