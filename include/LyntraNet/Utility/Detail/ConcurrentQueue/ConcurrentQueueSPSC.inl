@@ -13,8 +13,8 @@ ConcurrentQueue<T, SPSC>::ConcurrentQueue(size_t _size)
 template<typename T>
 bool ConcurrentQueue<T, SPSC>::Enqueue(const T* __restrict _src)
 {
-	size_t h = m_head.load(std::memory_order_acquire);
-	size_t t = m_tail.load(std::memory_order_relaxed);
+	size_t h = m_head.value.load(std::memory_order_acquire);
+	size_t t = m_tail.value.load(std::memory_order_relaxed);
 
 	if (t - h >= m_capacity) return false;
 
@@ -25,7 +25,7 @@ bool ConcurrentQueue<T, SPSC>::Enqueue(const T* __restrict _src)
 	else
 		m_buffer[idx] = std::move(*_src);
 
-	m_tail.store(t + 1, std::memory_order_release);
+	m_tail.value.store(t + 1, std::memory_order_release);
 
 	return true;
 }
@@ -33,8 +33,8 @@ bool ConcurrentQueue<T, SPSC>::Enqueue(const T* __restrict _src)
 template<typename T>
 bool ConcurrentQueue<T, SPSC>::Dequeue(T* __restrict _dest)
 {
-	size_t h = m_head.load(std::memory_order_relaxed);
-	size_t t = m_tail.load(std::memory_order_acquire);
+	size_t h = m_head.value.load(std::memory_order_relaxed);
+	size_t t = m_tail.value.load(std::memory_order_acquire);
 
 	if (t - h == 0) return false;
 
@@ -45,7 +45,7 @@ bool ConcurrentQueue<T, SPSC>::Dequeue(T* __restrict _dest)
 	else
 		*_dest = std::move(m_buffer[idx]);
 
-	m_head.store(h + 1, std::memory_order_release);
+	m_head.value.store(h + 1, std::memory_order_release);
 
 	return true;
 }

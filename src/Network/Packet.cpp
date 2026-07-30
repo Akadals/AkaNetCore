@@ -23,8 +23,8 @@ IOContext::IOContext() { Init(); }
 
 RingBuffer::WriteRegion RingBuffer::AcquireWriteRegion()
 {
-	size_t h = m_head.load(std::memory_order_acquire);
-	size_t t = m_tail.load(std::memory_order_relaxed);
+	size_t h = m_head.value.load(std::memory_order_acquire);
+	size_t t = m_tail.value.load(std::memory_order_relaxed);
 
 	size_t readable = t - h;
 	size_t writable = m_capacity - readable;
@@ -51,8 +51,8 @@ RingBuffer::WriteRegion RingBuffer::AcquireWriteRegion()
 
 RingBuffer::ReadRegion RingBuffer::AcquireReadRegion()
 {
-	size_t h = m_head.load(std::memory_order_relaxed);
-	size_t t = m_tail.load(std::memory_order_acquire);
+	size_t h = m_head.value.load(std::memory_order_relaxed);
+	size_t t = m_tail.value.load(std::memory_order_acquire);
 
 	size_t readable = t - h;
 
@@ -79,12 +79,12 @@ RingBuffer::ReadRegion RingBuffer::AcquireReadRegion()
 
 void RingBuffer::CommitWrite(size_t _size)
 {
-	size_t tail = m_tail.load(std::memory_order_relaxed);
-	m_tail.store(tail + _size, std::memory_order_release);
+	size_t tail = m_tail.value.load(std::memory_order_relaxed);
+	m_tail.value.store(tail + _size, std::memory_order_release);
 }
 
 void RingBuffer::CommitRead(size_t _size)
 {
-	size_t head = m_head.load(std::memory_order_relaxed);
-	m_head.store(head + _size, std::memory_order_release);
+	size_t head = m_head.value.load(std::memory_order_relaxed);
+	m_head.value.store(head + _size, std::memory_order_release);
 }

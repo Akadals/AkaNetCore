@@ -1,6 +1,6 @@
 using namespace LyntraNet::Utility;
 
-RingBuffer<SPSC>::RingBuffer<SPSC>(size_t _size)
+RingBuffer<FastSPSC>::RingBuffer<FastSPSC>(size_t _size)
 {
 	if (_size == 0) throw;
 
@@ -12,18 +12,21 @@ RingBuffer<SPSC>::RingBuffer<SPSC>(size_t _size)
 }
 
 template<size_t ByteSize>
-bool RingBuffer<SPSC>::TryWrite(const std::byte* __restrict _src)
+bool RingBuffer<FastSPSC>::TryWrite(const std::byte* __restrict _src)
 {
 	static_assert(ByteSize > 0);
 	if constexpr (ByteSize > 256)
 		return TryWrite(_src, ByteSize);
 	else
 	{
-		size_t h = m_head.value.load(std::memory_order_acquire);
-		size_t t = m_tail.value.load(std::memory_order_relaxed);
+		size_t t = m_producer.tail;
 
-		if ((t + ByteSize) - h > m_capacity) [[unlikely]]
-			return false;
+		if ((t + ByteSize) - m_producer.cachedHead > m_capacity) [[unlikely]]
+		{
+			m_producer.cachedHead = m_consumer.head;
+			if ((t + ByteSize) - m_producer.cachedHead > m_capacity) [[unlikely]]
+				return false;
+		}
 
 		size_t idx = t & m_mask;
 
@@ -39,22 +42,25 @@ bool RingBuffer<SPSC>::TryWrite(const std::byte* __restrict _src)
 			Memory::Copy(buffer, _src + remaining, ByteSize - remaining);
 		}
 
-		m_tail.value.store(t + ByteSize, std::memory_order_release);
+		m_producer.tail += ByteSize;
 
 		return true;
 	}
 }
 
-bool RingBuffer<SPSC>::TryWrite(const std::byte* __restrict _src, size_t _len)
+bool RingBuffer<FastSPSC>::TryWrite(const std::byte* __restrict _src, size_t _len)
 {
 	if (_len == 0) [[unlikely]]
 		return true;
 
-	size_t h = m_head.value.load(std::memory_order_acquire);
-	size_t t = m_tail.value.load(std::memory_order_relaxed);
+	size_t t = m_producer.tail;
 
-	if ((t + _len) - h > m_capacity) [[unlikely]]
-		return false;
+	if ((t + _len) - m_producer.cachedHead > m_capacity) [[unlikely]]
+	{
+		m_producer.cachedHead = m_consumer.head;
+		if ((t + _len) - m_producer.cachedHead > m_capacity) [[unlikely]]
+			return false;
+	}
 
 	size_t idx = t & m_mask;
 
@@ -67,20 +73,23 @@ bool RingBuffer<SPSC>::TryWrite(const std::byte* __restrict _src, size_t _len)
 	if (_len > remaining) [[unlikely]]
 		Memory::Copy(buffer, _src + first, _len - first);
 
-	m_tail.value.store(t + _len, std::memory_order_release);
+	m_producer.tail += _len;
 
 	return true;
 }
 
-bool RingBuffer<SPSC>::TryWrite(std::span<const std::byte> _src)
+bool RingBuffer<FastSPSC>::TryWrite(std::span<const std::byte> _src)
 {
-	size_t h = m_head.value.load(std::memory_order_acquire);
-	size_t t = m_tail.value.load(std::memory_order_relaxed);
-
 	size_t len = _src.size();
 
-	if ((t + len) - h > m_capacity) [[unlikely]]
-		return false;
+	size_t t = m_producer.tail;
+
+	if ((t + len) - m_producer.cachedHead > m_capacity) [[unlikely]]
+	{
+		m_producer.cachedHead = m_consumer.head;
+		if ((t + len) - m_producer.cachedHead > m_capacity) [[unlikely]]
+			return false;
+	}
 
 	size_t idx = t & m_mask;
 
@@ -94,24 +103,27 @@ bool RingBuffer<SPSC>::TryWrite(std::span<const std::byte> _src)
 	if (len > remaining) [[unlikely]]
 		Memory::Copy(buffer, src + first, len - first);
 
-	m_tail.value.store(t + len, std::memory_order_release);
+	m_producer.tail += len;
 
 	return true;
 }
 
 template<size_t ByteSize>
-bool RingBuffer<SPSC>::TryRead(std::byte* __restrict _dest)
+bool RingBuffer<FastSPSC>::TryRead(std::byte* __restrict _dest)
 {
 	static_assert(ByteSize > 0);
 	if constexpr (ByteSize > 256)
 		return TryRead(_dest, ByteSize);
 	else
 	{
-		size_t h = m_head.value.load(std::memory_order_relaxed);
-		size_t t = m_tail.value.load(std::memory_order_acquire);
+		size_t h = m_consumer.head;
 
-		if (t - h < ByteSize) [[unlikely]]
-			return false;
+		if (m_consumer.cachedTail - h < ByteSize) [[unlikely]]
+		{
+			m_consumer.cachedTail = m_producer.tail;
+			if (m_consumer.cachedTail - h < ByteSize) [[unlikely]]
+				return false;
+		}
 
 		size_t idx = h & m_mask;
 
@@ -127,22 +139,24 @@ bool RingBuffer<SPSC>::TryRead(std::byte* __restrict _dest)
 			Memory::Copy(_dest + remaining, buffer, ByteSize - remaining);
 		}
 
-		m_head.value.store(h + ByteSize, std::memory_order_release);
-
+		m_consumer.head += ByteSize;
 		return true;
 	}
 }
 
-bool RingBuffer<SPSC>::TryRead(std::byte* __restrict _dest, size_t _len)
+bool RingBuffer<FastSPSC>::TryRead(std::byte* __restrict _dest, size_t _len)
 {
 	if (_len == 0) [[unlikely]]
 		return true;
 
-	size_t h = m_head.value.load(std::memory_order_relaxed);
-	size_t t = m_tail.value.load(std::memory_order_acquire);
+	size_t h = m_consumer.head;
 
-	if (t - h < _len) [[unlikely]]
-		return false;
+	if (m_consumer.cachedTail - h < _len) [[unlikely]]
+	{
+		m_consumer.cachedTail = m_producer.tail;
+		if (m_consumer.cachedTail - h < _len) [[unlikely]]
+			return false;
+	}
 
 	size_t idx = h & m_mask;
 
@@ -155,20 +169,23 @@ bool RingBuffer<SPSC>::TryRead(std::byte* __restrict _dest, size_t _len)
 	if (_len > remaining) [[unlikely]]
 		Memory::Copy(_dest + first, buffer, _len - first);
 
-	m_head.value.store(h + _len, std::memory_order_release);
+	m_consumer.head += _len;
 
 	return true;
 }
 
-bool RingBuffer<SPSC>::TryRead(std::span<std::byte> _dest)
+bool RingBuffer<FastSPSC>::TryRead(std::span<std::byte> _dest)
 {
-	size_t h = m_head.value.load(std::memory_order_relaxed);
-	size_t t = m_tail.value.load(std::memory_order_acquire);
-
 	size_t len = _dest.size();
 
-	if (t - h < len) [[unlikely]]
-		return false;
+	size_t h = m_consumer.head;
+
+	if (m_consumer.cachedTail - h < len) [[unlikely]]
+	{
+		m_consumer.cachedTail = m_producer.tail;
+		if (m_consumer.cachedTail - h < len) [[unlikely]]
+			return false;
+	}
 
 	size_t idx = h & m_mask;
 
@@ -182,25 +199,27 @@ bool RingBuffer<SPSC>::TryRead(std::span<std::byte> _dest)
 	if (len > remaining) [[unlikely]]
 		Memory::Copy(dest + first, buffer, len - first);
 
-	m_head.value.store(h + len, std::memory_order_release);
+	m_consumer.head += len;
 
 	return true;
 }
 
 template<size_t ByteSize>
-void RingBuffer<SPSC>::ReadPreview(std::byte* __restrict _dest) const
+void RingBuffer<FastSPSC>::ReadPreview(std::byte* __restrict _dest) const
 {
 	static_assert(ByteSize > 0);
 	if constexpr (ByteSize > 256)
 		return ReadPreview(_dest, ByteSize);
 	else
 	{
+		size_t h = m_consumer.head;
 
-		size_t h = m_head.value.load(std::memory_order_relaxed);
-		size_t t = m_tail.value.load(std::memory_order_acquire);
-
-		if (t - h < ByteSize) [[unlikely]]
-			return;
+		if (m_consumer.cachedTail - h < ByteSize) [[unlikely]]
+		{
+			m_consumer.cachedTail = m_producer.tail;
+			if (m_consumer.cachedTail - h < ByteSize) [[unlikely]]
+				return;
+		}
 
 		size_t idx = h & m_mask;
 
@@ -218,16 +237,19 @@ void RingBuffer<SPSC>::ReadPreview(std::byte* __restrict _dest) const
 	}
 }
 
-void RingBuffer<SPSC>::ReadPreview(std::byte* __restrict _dest, size_t _len) const
+void RingBuffer<FastSPSC>::ReadPreview(std::byte* __restrict _dest, size_t _len) const
 {
 	if (_len == 0) [[unlikely]]
 		return;
 
-	size_t h = m_head.value.load(std::memory_order_relaxed);
-	size_t t = m_tail.value.load(std::memory_order_acquire);
+	size_t h = m_consumer.head;
 
-	if (t - h < _len) [[unlikely]]
-		return;
+	if (m_consumer.cachedTail - h < _len) [[unlikely]]
+	{
+		m_consumer.cachedTail = m_producer.tail;
+		if (m_consumer.cachedTail - h < _len) [[unlikely]]
+			return;
+	}
 
 	size_t idx = h & m_mask;
 
@@ -241,15 +263,18 @@ void RingBuffer<SPSC>::ReadPreview(std::byte* __restrict _dest, size_t _len) con
 		Memory::Copy(_dest + first, buffer, _len - first);
 }
 
-void RingBuffer<SPSC>::ReadPreview(std::span<std::byte> _dest) const
+void RingBuffer<FastSPSC>::ReadPreview(std::span<std::byte> _dest) const
 {
-	size_t h = m_head.value.load(std::memory_order_relaxed);
-	size_t t = m_tail.value.load(std::memory_order_acquire);
-
 	size_t len = _dest.size();
 
-	if (t - h < len) [[unlikely]]
-		return;
+	size_t h = m_consumer.head;
+
+	if (m_consumer.cachedTail - h < len) [[unlikely]]
+	{
+		m_consumer.cachedTail = m_producer.tail;
+		if (m_consumer.cachedTail - h < len) [[unlikely]]
+			return;
+	}
 
 	size_t idx = h & m_mask;
 
@@ -264,15 +289,15 @@ void RingBuffer<SPSC>::ReadPreview(std::span<std::byte> _dest) const
 		Memory::Copy(dest + first, buffer, len - first);
 }
 
-void RingBuffer<SPSC>::Clear()
+void RingBuffer<FastSPSC>::Clear()
 {
-	size_t t = m_tail.value.load(std::memory_order_relaxed);
-	m_head.value.store(t, std::memory_order_relaxed);
+	m_consumer.head = m_producer.tail;
+	m_producer.cachedHead = m_consumer.cachedTail;
 }
 
-size_t RingBuffer<SPSC>::Size() const noexcept
+size_t RingBuffer<FastSPSC>::Size() const noexcept
 {
-	const size_t t = m_tail.value.load(std::memory_order_relaxed);
-	const size_t h = m_head.value.load(std::memory_order_relaxed);
+	const size_t t = m_producer.tail;
+	const size_t h = m_consumer.head;
 	return t - h;
 }

@@ -1,6 +1,7 @@
 #ifndef __INCL_LYNTRA_PACKET_H__
 #define __INCL_LYNTRA_PACKET_H__
 
+#include "Utility/ConcurrentPolicy.h"
 #include <winsock2.h>
 #include <atomic>
 #include <vector>
@@ -105,8 +106,8 @@ namespace LyntraNet::Packet
 		size_t m_capacity = 0;
 		size_t m_mask = 0;
 
-		mutable alignas(64) std::atomic<size_t> m_head = 0;
-		mutable alignas(64) std::atomic<size_t> m_tail = 0;
+		mutable CacheLineAtomic m_head;
+		mutable CacheLineAtomic m_tail;
 	public:
 		RingBuffer(size_t _size);
 

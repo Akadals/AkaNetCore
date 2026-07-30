@@ -2,8 +2,10 @@
 #define __INCL_LYNTRA_RING_BUFFER_H__
 
 #include "ConcurrentPolicy.h"
+#include "../Memory.h"
 #include <atomic>
 #include <memory>
+#include <span>
 
 namespace LyntraNet::Utility
 {
@@ -19,15 +21,30 @@ namespace LyntraNet::Utility
 		size_t m_capacity;
 		size_t m_mask;
 
-		alignas(64) mutable std::atomic<size_t> m_head = 0;
-		alignas(64) mutable std::atomic<size_t> m_tail = 0;
+		mutable CacheLineAtomic m_head;
+		mutable CacheLineAtomic m_tail;
 	public:
 		RingBuffer<SPSC>(size_t _size);
-		bool Push(const std::byte* __restrict _src, size_t _len);
-		bool Pop(std::byte* __restrict _dest, size_t _len);
-		bool Peek(std::byte* __restrict _dest, size_t _len) const;
-		size_t Size() const;
+
+		template<size_t ByteSize>
+		bool TryWrite(const std::byte* __restrict _src);
+		bool TryWrite(const std::byte* __restrict _src, size_t _len);
+		bool TryWrite(std::span<const std::byte> _src);
+
+		template<size_t ByteSize>
+		bool TryRead(std::byte* __restrict _dest);
+		bool TryRead(std::byte* __restrict _dest, size_t _len);
+		bool TryRead(std::span<std::byte> _dest);
+
+		template<size_t ByteSize>
+		void ReadPreview(std::byte* __restrict _dest) const;
+		void ReadPreview(std::byte* __restrict _dest, size_t _len) const;
+		void ReadPreview(std::span<std::byte> _dest) const;
+
 		void Clear();
+
+		size_t Size() const noexcept;
+		size_t Capacity() const { return m_capacity; }
 	};
 
 	template<>
@@ -38,8 +55,8 @@ namespace LyntraNet::Utility
 		size_t m_capacity;
 		size_t m_mask;
 
-		alignas(64) mutable std::atomic<size_t> m_head = 0;
-		alignas(64) mutable std::atomic<size_t> m_tail = 0;
+		mutable CacheLineAtomic m_head;
+		mutable CacheLineAtomic m_tail;
 	public:
 		RingBuffer<MPSC>(size_t _size);
 	};
@@ -51,8 +68,8 @@ namespace LyntraNet::Utility
 		size_t m_capacity;
 		size_t m_mask;
 
-		alignas(64) mutable std::atomic<size_t> m_head = 0;
-		alignas(64) mutable std::atomic<size_t> m_tail = 0;
+		mutable CacheLineAtomic m_head;
+		mutable CacheLineAtomic m_tail;
 	public:
 		RingBuffer<SPMC>(size_t _size);
 	};
@@ -71,10 +88,58 @@ namespace LyntraNet::Utility
 		size_t m_capacity;
 		size_t m_mask;
 
-		alignas(64) mutable std::atomic<size_t> m_head = 0;
-		alignas(64) mutable std::atomic<size_t> m_tail = 0;
+		mutable CacheLineAtomic m_head;
+		mutable CacheLineAtomic m_tail;
 	public:
 		RingBuffer<MPMC>(size_t _size);
+
+		bool TryWrite(const std::byte* __restrict _src, size_t _len);
+		bool TryWrite(std::span<const std::byte> _src);
+
+		bool TryRead(std::byte* __restrict _dest, size_t _len);
+		bool TryRead(std::span<std::byte> _dest);
+
+		void ReadPreview(std::byte* __restrict _dest, size_t _len) const;
+		void ReadPreview(std::span<std::byte> _dest) const;
+
+		void Clear();
+
+		size_t Size() const noexcept;
+		size_t Capacity() const { return m_capacity; }
+	};
+	template<>
+	class RingBuffer<FastSPSC>
+	{
+	private:
+		std::unique_ptr<std::byte[]> m_buffer;
+
+		size_t m_capacity;
+		size_t m_mask;
+
+		mutable UnsafeProducer m_producer;
+		mutable UnsafeConsumer m_consumer;
+	public:
+		RingBuffer<FastSPSC>(size_t _size);
+
+		template<size_t ByteSize>
+		bool TryWrite(const std::byte* __restrict _src);
+		bool TryWrite(const std::byte* __restrict _src, size_t _len);
+		bool TryWrite(std::span<const std::byte> _src);
+
+		template<size_t ByteSize>
+		bool TryRead(std::byte* __restrict _dest);
+		bool TryRead(std::byte* __restrict _dest, size_t _len);
+		bool TryRead(std::span<std::byte> _dest);
+
+		template<size_t ByteSize>
+		void ReadPreview(std::byte* __restrict _dest) const;
+		void ReadPreview(std::byte* __restrict _dest, size_t _len) const;
+		void ReadPreview(std::span<std::byte> _dest) const;
+
+		void Clear();
+
+		size_t Size() const noexcept;
+		size_t Capacity() const { return m_capacity; }
 	};
 }
 
@@ -82,4 +147,5 @@ namespace LyntraNet::Utility
 #include "Detail/RingBuffer/RingBufferMPSC.inl"
 #include "Detail/RingBuffer/RingBufferSPMC.inl"
 #include "Detail/RingBuffer/RingBufferMPMC.inl"
+#include "Detail/RingBuffer/RingBufferFastSPSC.inl"
 #endif

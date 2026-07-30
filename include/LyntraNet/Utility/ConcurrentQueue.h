@@ -20,8 +20,8 @@ namespace LyntraNet::Utility
 		size_t m_capacity;
 		size_t m_mask;
 
-		alignas(64) mutable std::atomic<size_t> m_head;
-		alignas(64) mutable std::atomic<size_t> m_tail;
+		mutable CacheLineAtomic m_head;
+		mutable CacheLineAtomic m_tail;
 	public:
 		ConcurrentQueue(size_t _size);
 		bool Enqueue(const T* __restrict _src);
@@ -54,8 +54,8 @@ namespace LyntraNet::Utility
 		size_t m_capacity;
 		size_t m_mask;
 
-		alignas(64) mutable std::atomic<size_t> m_head;
-		alignas(64) mutable std::atomic<size_t> m_tail;
+		mutable CacheLineAtomic m_head;
+		mutable CacheLineAtomic m_tail;
 	public:
 		ConcurrentQueue(size_t _size);
 		bool Enqueue(const T* __restrict _src);

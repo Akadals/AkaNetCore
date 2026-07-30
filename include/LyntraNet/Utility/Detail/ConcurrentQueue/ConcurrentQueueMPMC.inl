@@ -15,7 +15,7 @@ ConcurrentQueue<T, MPMC>::ConcurrentQueue(size_t _size)
 template<typename T>
 bool ConcurrentQueue<T, MPMC>::Enqueue(const T* __restrict _src)
 {
-	size_t t = m_tail.load(std::memory_order_acquire);
+	size_t t = m_tail.value.load(std::memory_order_acquire);
 
 	size_t idx = t & m_mask;
 	size_t sequence = m_buffer[idx].m_sequence.load(std::memory_order_relaxed);
@@ -37,7 +37,7 @@ bool ConcurrentQueue<T, MPMC>::Enqueue(const T* __restrict _src)
 		if (difference < 0) return false;
 		else if (difference == 0)
 		{
-			if (!m_tail.compare_exchange_weak(t, t + 1,
+			if (!m_tail.value.compare_exchange_weak(t, t + 1,
 				std::memory_order_acq_rel,
 				std::memory_order_acquire))
 			{
@@ -57,7 +57,7 @@ bool ConcurrentQueue<T, MPMC>::Enqueue(const T* __restrict _src)
 		}
 		else
 		{
-			t = m_tail.load(std::memory_order_relaxed);
+			t = m_tail.value.load(std::memory_order_relaxed);
 			UpdateCellState();
 			continue;
 		}
@@ -89,7 +89,7 @@ bool ConcurrentQueue<T, MPMC>::Dequeue(T* __restrict _dest)
 		if (difference < 0) return false;
 		else if (difference == 0)
 		{
-			if (!m_head.compare_exchange_weak(h, h + 1,
+			if (!m_head.value.compare_exchange_weak(h, h + 1,
 				std::memory_order_acq_rel,
 				std::memory_order_acquire))
 			{
@@ -110,7 +110,7 @@ bool ConcurrentQueue<T, MPMC>::Dequeue(T* __restrict _dest)
 		}
 		else
 		{
-			h = m_head.load(std::memory_order_relaxed);
+			h = m_head.value.load(std::memory_order_relaxed);
 			UpdateCellState();
 			continue;
 		}
@@ -120,7 +120,7 @@ bool ConcurrentQueue<T, MPMC>::Dequeue(T* __restrict _dest)
 template<typename T>
 bool ConcurrentQueue<T, MPMC>::TryDequeue(T* __restrict _dest)
 {
-	size_t h = m_head.load(std::memory_order_acquire);
+	size_t h = m_head.value.load(std::memory_order_acquire);
 
 	size_t idx = h & m_mask;
 	size_t sequence = m_buffer[idx].m_sequence.load(std::memory_order_relaxed);
@@ -141,7 +141,7 @@ bool ConcurrentQueue<T, MPMC>::TryDequeue(T* __restrict _dest)
 	{
 		if (difference == 0)
 		{
-			if (!m_head.compare_exchange_strong(h, h + 1,
+			if (!m_head.value.compare_exchange_strong(h, h + 1,
 				std::memory_order_acq_rel,
 				std::memory_order_acquire)) return false;
 
