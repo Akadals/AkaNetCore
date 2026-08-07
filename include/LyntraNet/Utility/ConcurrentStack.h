@@ -22,7 +22,7 @@ namespace LyntraNet::Utility
 		ConcurrentStack(size_t _size);
 		bool Push(const T& _data);
 		bool Pop(T& _dest);
-		void Top(T& _dest);
+		void Top(T* _dest);
 	};
 	template<typename T>
 	class ConcurrentStack<T, MPSC>
@@ -67,6 +67,9 @@ namespace LyntraNet::Utility
 		mutable CacheLineAtomic m_top;
 	public:
 		ConcurrentStack(size_t _size);
+		bool Push(const T& _data);
+		bool Pop(T& _dest);
+		void Top(T* _dest);
 	};
 }
 

@@ -78,18 +78,16 @@ namespace LyntraNet::Utility
 	class RingBuffer<MPMC>
 	{
 	private:
-		struct Cell
-		{
-			std::atomic<size_t> m_sequence;
-			std::byte m_data;
-		};
-		std::unique_ptr<Cell[]> m_buffer;
+		std::unique_ptr<std::byte[]> m_buffer;
 
 		size_t m_capacity;
 		size_t m_mask;
 
-		mutable CacheLineAtomic m_head;
-		mutable CacheLineAtomic m_tail;
+		mutable CacheLineAtomic m_reserveHead;
+		mutable CacheLineAtomic m_publishHead;
+
+		mutable CacheLineAtomic m_reserveTail;
+		mutable CacheLineAtomic m_publishTail;
 	public:
 		RingBuffer<MPMC>(size_t _size);
 
@@ -108,7 +106,7 @@ namespace LyntraNet::Utility
 		size_t Capacity() const { return m_capacity; }
 	};
 	template<>
-	class RingBuffer<FastSPSC>
+	class RingBuffer<Fast>
 	{
 	private:
 		std::unique_ptr<std::byte[]> m_buffer;
@@ -116,10 +114,10 @@ namespace LyntraNet::Utility
 		size_t m_capacity;
 		size_t m_mask;
 
-		mutable UnsafeProducer m_producer;
-		mutable UnsafeConsumer m_consumer;
+		mutable CacheLineCached m_producer;
+		mutable CacheLineCached m_consumer;
 	public:
-		RingBuffer<FastSPSC>(size_t _size);
+		RingBuffer<Fast>(size_t _size);
 
 		template<size_t ByteSize>
 		bool TryWrite(const std::byte* __restrict _src);
@@ -147,5 +145,5 @@ namespace LyntraNet::Utility
 #include "Detail/RingBuffer/RingBufferMPSC.inl"
 #include "Detail/RingBuffer/RingBufferSPMC.inl"
 #include "Detail/RingBuffer/RingBufferMPMC.inl"
-#include "Detail/RingBuffer/RingBufferFastSPSC.inl"
+#include "Detail/RingBuffer/RingBufferFast.inl"
 #endif

@@ -1,12 +1,12 @@
-#include <LyntraNet/Session/Session.h>
+#include <LyntraNet/Network/Session.h>
 
-using namespace LyntraNet::Session;
+using namespace LyntraNet::Network;
 
-Session::Session(SOCKET socket, SOCKADDR_IN addr)
-	:NetworkSession(socket, addr)
-{
-
-}
-
-Session::~Session()
-{}
+//Session::Session(SOCKET socket, SOCKADDR_IN addr)
+//	:NetworkClient(socket, addr)
+//{
+//
+//}
+//
+//Session::~Session()
+//{}

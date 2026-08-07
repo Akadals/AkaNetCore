@@ -13,7 +13,7 @@ struct MPSC {}; // Multi-Producer Single-Consumer
 struct SPMC {}; // Single-Producer Multi-Consumer
 struct MPMC {}; // Multi-Producer Multi-Consumer
 
-struct FastSPSC {}; // Fast Single-Producer Single-Consumer (Non-atomic)
+struct Fast {}; // Fast Single-Producer Single-Consumer (Non-atomic)
 
 template<typename T>
 concept ConcurrentPolicy =
@@ -21,7 +21,7 @@ std::same_as<T, SPSC> ||
 std::same_as<T, MPSC> ||
 std::same_as<T, SPMC> ||
 std::same_as<T, MPMC> ||
-std::same_as<T, FastSPSC>;
+std::same_as<T, Fast>;
 
 struct alignas(CACHE_SIZE) CacheLineAtomic
 {
@@ -33,18 +33,9 @@ private:
 static_assert(sizeof(CacheLineAtomic) == CACHE_SIZE);
 static_assert(alignof(CacheLineAtomic) == CACHE_SIZE);
 
-#pragma region Unsafe
-struct UnsafeProducer
+struct CacheLineCached
 {
-    alignas(64) size_t tail = 0;
-    size_t cachedHead = 0;
+    alignas(CACHE_SIZE) size_t value = 0;
+    size_t cachedValue = 0;
 };
-
-
-struct UnsafeConsumer
-{
-    alignas(64) size_t head = 0;
-    size_t cachedTail = 0;
-};
-#pragma endregion
 #endif

@@ -40,7 +40,7 @@ bool ConcurrentStack<T, SPSC>::Pop(T& _data)
 }
 
 template<typename T>
-void ConcurrentStack<T, SPSC>::Top(T& _data)
+void ConcurrentStack<T, SPSC>::Top(T* _data)
 {
 	size_t t = m_top.value.load(std::memory_order_acquire);
 

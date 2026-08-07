@@ -8,10 +8,7 @@ RingBuffer<MPMC>::RingBuffer<MPMC>(size_t _size)
 	while (cap < _size) cap <<= 1;
 
 	m_mask = (m_capacity = cap) - 1;
-	m_buffer = std::make_unique<Cell[]>(m_capacity);
-
-	for (int i = 0; i < m_capacity; i++)
-		m_buffer[i].m_sequence = i;
+	m_buffer = std::make_unique<std::byte[]>(m_capacity);
 }
 
 bool RingBuffer<MPMC>::TryWrite(const std::byte* __restrict _src, size_t _len)

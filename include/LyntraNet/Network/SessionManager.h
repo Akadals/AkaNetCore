@@ -2,7 +2,7 @@
 #define __INCL_LYNTRA_SESSION_MANAGER_H__
 #include "Session.h"
 
-namespace LyntraNet::Session
+namespace LyntraNet::Network
 {
 
 }

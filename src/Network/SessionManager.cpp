@@ -1,1 +1,1 @@
-#include <LyntraNet/Session/SessionManager.h>
+#include <LyntraNet/Network/SessionManager.h>
