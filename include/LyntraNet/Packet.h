@@ -9,7 +9,7 @@
 namespace LyntraNet::Packet
 {
 	typedef enum class IOType : uint8_t
-	{ READING, WRITING }
+	{ READING, WRITING, ACCEPT }
 	IOTYPE;
 
 	typedef struct Header
@@ -33,6 +33,7 @@ namespace LyntraNet::Packet
 		OVERLAPPED m_overlapped = {};
 		WSABUF m_wsaBuf[2] = {};
 		IOTYPE m_ioType = {};
+		SOCKET m_socket = { INVALID_SOCKET };
 	public:
 		IOContext();
 		void Init();
@@ -43,79 +44,6 @@ namespace LyntraNet::Packet
 	private:
 		std::vector<char> m_data;
 		uint32_t m_header;
-	};
-
-	class alignas(64) RingBuffer
-	{
-	public:
-		struct Region
-		{
-			char* firstPtr = nullptr;
-			size_t firstSize = 0;
-			char* secondPtr = nullptr;
-			size_t secondSize = 0;
-
-			Region(
-				char* _firstPtr,
-				size_t _firstSize,
-				char* _secondPtr,
-				size_t _secondSize) :
-				firstPtr(_firstPtr),
-				firstSize(_firstSize),
-				secondPtr(_secondPtr),
-				secondSize(_secondSize) {}
-
-			bool Empty() const
-			{ return firstSize + secondSize == 0; }
-		};
-		struct WriteRegion : public Region
-		{
-			size_t writableSize = 0;
-			WriteRegion(
-				char* _firstPtr,
-				size_t _firstSize,
-				char* _secondPtr,
-				size_t _secondSize,
-				size_t _writableSize) :
-				Region(
-					_firstPtr,
-					_firstSize,
-					_secondPtr,
-					_secondSize),
-				writableSize(_writableSize) {}
-		};
-		struct ReadRegion : public Region
-		{
-			size_t readableSize = 0;
-			ReadRegion(
-				char* _firstPtr,
-				size_t _firstSize,
-				char* _secondPtr,
-				size_t _secondSize,
-				size_t _readableSize) :
-				Region(
-					_firstPtr,
-					_firstSize,
-					_secondPtr,
-					_secondSize),
-				readableSize(_readableSize) {}
-		};
-	private:
-		std::unique_ptr<char[]> m_buf;
-
-		size_t m_capacity = 0;
-		size_t m_mask = 0;
-
-		mutable CacheLineAtomic m_head;
-		mutable CacheLineAtomic m_tail;
-	public:
-		RingBuffer(size_t _size);
-
-		WriteRegion AcquireWriteRegion();
-		ReadRegion AcquireReadRegion();
-
-		void CommitWrite(size_t _size);
-		void CommitRead(size_t _size);
 	};
 }
 #endif

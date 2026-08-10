@@ -14,7 +14,6 @@ namespace LyntraNet::Network
 		socklen_t m_length = {};
 	public:
 		IPAddress() = default;
-		IPAddress(const sockaddr* _addr, socklen_t _len);
 
 		void SetAddress(const sockaddr* _addr, socklen_t _len);
 

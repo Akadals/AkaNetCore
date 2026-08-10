@@ -139,6 +139,81 @@ namespace LyntraNet::Utility
 		size_t Size() const noexcept;
 		size_t Capacity() const { return m_capacity; }
 	};
+	template<>
+	class RingBuffer<ZeroCopy>
+	{
+	public:
+		struct Region
+		{
+			std::byte* firstPtr = nullptr;
+			size_t firstSize = 0;
+			std::byte* secondPtr = nullptr;
+			size_t secondSize = 0;
+
+			Region(
+				std::byte* _firstPtr,
+				size_t _firstSize,
+				std::byte* _secondPtr,
+				size_t _secondSize) :
+				firstPtr(_firstPtr),
+				firstSize(_firstSize),
+				secondPtr(_secondPtr),
+				secondSize(_secondSize) {}
+
+			bool Empty() const
+			{
+				return firstSize + secondSize == 0;
+			}
+		};
+		struct WriteRegion : public Region
+		{
+			size_t writableSize = 0;
+			WriteRegion(
+				std::byte* _firstPtr,
+				size_t _firstSize,
+				std::byte* _secondPtr,
+				size_t _secondSize,
+				size_t _writableSize) :
+				Region(
+					_firstPtr,
+					_firstSize,
+					_secondPtr,
+					_secondSize),
+				writableSize(_writableSize) {}
+		};
+		struct ReadRegion : public Region
+		{
+			size_t readableSize = 0;
+			ReadRegion(
+				std::byte* _firstPtr,
+				size_t _firstSize,
+				std::byte* _secondPtr,
+				size_t _secondSize,
+				size_t _readableSize) :
+				Region(
+					_firstPtr,
+					_firstSize,
+					_secondPtr,
+					_secondSize),
+				readableSize(_readableSize) {}
+		};
+	private:
+		std::unique_ptr<std::byte[]> m_buffer;
+
+		size_t m_capacity;
+		size_t m_mask;
+
+		mutable CacheLineAtomic m_head;
+		mutable CacheLineAtomic m_tail;
+	public:
+		RingBuffer<ZeroCopy>(size_t _size);
+
+		WriteRegion AcquireWriteRegion();
+		ReadRegion AcquireReadRegion();
+
+		void CommitWrite(size_t _size);
+		void CommitRead(size_t _size);
+	};
 }
 
 #include "Detail/RingBuffer/RingBufferSPSC.inl"
@@ -146,4 +221,5 @@ namespace LyntraNet::Utility
 #include "Detail/RingBuffer/RingBufferSPMC.inl"
 #include "Detail/RingBuffer/RingBufferMPMC.inl"
 #include "Detail/RingBuffer/RingBufferFast.inl"
+#include "Detail/RingBuffer/RingBufferZeroCopy.inl"
 #endif

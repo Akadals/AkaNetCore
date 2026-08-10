@@ -4,6 +4,11 @@
 #include <LyntraNet/Utility.h>
 #include <LyntraNet/Packet.h>
 #include <LyntraNet/Network/Socket/NetworkSocket.h>
+#include <LyntraNet/Network/Socket/NetworkTCPSocket.h>
+#include <LyntraNet/Network/Socket/NetworkUDPSocket.h>
+#include <LyntraNet/Network/Socket/NetworkRUDPSocket.h>
+#include <LyntraNet/Network/Socket/NetworkQUICSocket.h>
+#include <LyntraNet/Network/Socket/NetworkTLSSocket.h>
 
 #include <WinSock2.h>
 #include <WS2tcpip.h>
@@ -17,23 +22,23 @@ namespace LyntraNet::Network
 	class alignas(64) NetworkClient
 	{
 	public:
-		static const size_t RECV_BUF_SIZE = 4096;
-		static const size_t SEND_BUF_SIZE = 4096;
-		static const size_t IO_CONTEXT_POOL_SIZE = 128;
+		static const size_t RECV_BUF_SIZE = 8192;
+		static const size_t SEND_BUF_SIZE = 8192;
 	private:
-		Socket::NetworkSocket m_sock;
+		std::unique_ptr<Socket::NetworkSocket> m_sock;
 
-		Packet::RingBuffer m_recvBuf = { RECV_BUF_SIZE };
-		Packet::RingBuffer m_sendBuf = { SEND_BUF_SIZE };
-
-		LockFreePool<Packet::IOCONTEXT> m_ioContext = { IO_CONTEXT_POOL_SIZE };
-
-		alignas(64) std::atomic<DWORD> m_ioCount = 0x80000000;
-		alignas(64) DWORD m_ioFlag = 0;
+		RingBuffer<ZeroCopy> m_recvBuf = { RECV_BUF_SIZE };
+		RingBuffer<ZeroCopy> m_sendBuf = { SEND_BUF_SIZE };
 	public:
-		NetworkClient(SOCKET _socket, const SOCKADDR_IN& _addr) :
-			m_sock(_socket, _addr) {}
-		Socket::NetworkSocket operator->() { return m_sock; }
+		NetworkClient() = default;
+
+		void AllocateSocket(
+			SOCKET _socket,
+			const SOCKADDR_IN& _localAddr,
+			const SOCKADDR_IN& _remoteAddr)
+		{
+			m_sock->Allocate(_socket, _localAddr, _remoteAddr);
+		}
 
 		DWORD Read();
 		DWORD Write();

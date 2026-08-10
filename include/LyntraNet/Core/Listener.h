@@ -3,21 +3,26 @@
 #include <MSWSock.h>
 #include <ws2tcpip.h>
 
-//#include "../Network/NetworkSocket.h"
+#include <LyntraNet/Network/NetworkClient.h>
+#include <LyntraNet/Network/ClientManager.h>
 
 namespace LyntraNet
 {
 	class Listener
 	{
 	private:
-		//Network::NET_SOCK listenSock;
+		SOCKET m_listenSock = { INVALID_SOCKET };
 
-		LPFN_ACCEPTEX lpAcceptEx = {};
-		LPFN_GETACCEPTEXSOCKADDRS lpGetAcceptExSockaddrs = {};
+		LPFN_ACCEPTEX m_lpAcceptEx = {};
+		LPFN_GETACCEPTEXSOCKADDRS m_lpGetAcceptExSockaddrs = {};
+
+		Network::ClientManager m_clientManager = {};
 	public:
+		Listener() = default;
 		bool Startup();
 	private:
 		void LoadAcceptEx();
-		void PostAccept();
+		void PostAccept() const;
+		void OnAccept(Packet::PIOCONTEXT _context);
 	};
 }

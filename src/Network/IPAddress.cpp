@@ -2,11 +2,6 @@
 
 using namespace LyntraNet::Network;
 
-IPAddress::IPAddress(const sockaddr* _addr, socklen_t _len)
-{
-	SetAddress(_addr, _len);
-}
-
 void IPAddress::SetAddress(const sockaddr * _addr, socklen_t _len)
 {
 	m_length = _len;
@@ -35,6 +30,27 @@ bool IPAddress::IsIPv6() const
 
 bool IPAddress::IsLoopback() const
 {
+	if (Family() == AF_INET)
+	{
+		const sockaddr_in* addr =
+			reinterpret_cast<const sockaddr_in*>(&m_storage);
+		uint32_t ip = ntohl(addr->sin_addr.s_addr);
+		return (ip & 0xFF000000) == 0x7F000000;
+	}
+	else if(Family() == AF_INET6)
+	{
+		const sockaddr_in6* addr =
+			reinterpret_cast<const sockaddr_in6*>(&m_storage);
+		if (IN6_IS_ADDR_LOOPBACK(&addr->sin6_addr))
+			return true;
+		if (IN6_IS_ADDR_V4MAPPED(&addr->sin6_addr))
+		{
+			const uint32_t* v4_mapped = 
+				reinterpret_cast<const uint32_t*>(addr->sin6_addr.s6_addr + 12);
+			uint32_t ip = ntohl(*v4_mapped);
+			return (ip & 0xFF000000) == 0x7F000000;
+		}
+	}
 	return false;
 }
 
