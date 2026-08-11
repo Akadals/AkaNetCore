@@ -7,27 +7,26 @@
 
 namespace LyntraNet::Utility
 {
-	template<typename T, ConcurrentPolicy Policy>
+	template<typename Key, typename Value, ConcurrentPolicy Policy>
 	class ConcurrentHashMap;
 
-
-	template<typename T>
-	class ConcurrentHashMap<T, SPSC>
+	template<typename Key, typename Value>
+	class ConcurrentHashMap<Key, Value, SPSC>
 	{
 
 	};
-	template<typename T>
-	class ConcurrentHashMap<T, MPSC>
+	template<typename Key, typename Value>
+	class ConcurrentHashMap<Key, Value, MPSC>
 	{
 
 	};
-	template<typename T>
-	class ConcurrentHashMap<T, SPMC>
+	template<typename Key, typename Value>
+	class ConcurrentHashMap<Key, Value, SPMC>
 	{
 
 	};
-	template<typename T>
-	class ConcurrentHashMap<T, MPMC>
+	template<typename Key, typename Value>
+	class ConcurrentHashMap<Key, Value, MPMC>
 	{
 
 	};

@@ -1,8 +1,8 @@
-#include "LyntraNet/Network/NetworkClient.h"
+#include "LyntraNet/Network/NetworkConnection.h"
 
 using namespace LyntraNet::Network;
 
-DWORD NetworkClient::Read()
+DWORD NetworkConnection::Read()
 {
 	auto region =
 		m_recvBuf.AcquireWriteRegion();
@@ -25,7 +25,7 @@ DWORD NetworkClient::Read()
 	return m_sock->Read(*ctx);
 }
 
-DWORD NetworkClient::Write()
+DWORD NetworkConnection::Write()
 {
 	return 0;
 }

@@ -106,7 +106,7 @@ namespace LyntraNet::Utility
 		size_t Capacity() const { return m_capacity; }
 	};
 	template<>
-	class RingBuffer<Fast>
+	class RingBuffer<FastSPSC>
 	{
 	private:
 		std::unique_ptr<std::byte[]> m_buffer;
@@ -117,7 +117,7 @@ namespace LyntraNet::Utility
 		mutable CacheLineCached m_producer;
 		mutable CacheLineCached m_consumer;
 	public:
-		RingBuffer<Fast>(size_t _size);
+		RingBuffer<FastSPSC>(size_t _size);
 
 		template<size_t ByteSize>
 		bool TryWrite(const std::byte* __restrict _src);
@@ -220,6 +220,6 @@ namespace LyntraNet::Utility
 #include "Detail/RingBuffer/RingBufferMPSC.inl"
 #include "Detail/RingBuffer/RingBufferSPMC.inl"
 #include "Detail/RingBuffer/RingBufferMPMC.inl"
-#include "Detail/RingBuffer/RingBufferFast.inl"
+#include "Detail/RingBuffer/RingBufferFastSPSC.inl"
 #include "Detail/RingBuffer/RingBufferZeroCopy.inl"
 #endif

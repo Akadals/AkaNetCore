@@ -1,6 +1,6 @@
 using namespace LyntraNet::Utility;
 
-RingBuffer<Fast>::RingBuffer<Fast>(size_t _size)
+RingBuffer<FastSPSC>::RingBuffer(size_t _size)
 {
 	if (_size == 0) throw;
 
@@ -12,7 +12,7 @@ RingBuffer<Fast>::RingBuffer<Fast>(size_t _size)
 }
 
 template<size_t ByteSize>
-bool RingBuffer<Fast>::TryWrite(const std::byte* __restrict _src)
+bool RingBuffer<FastSPSC>::TryWrite(const std::byte* __restrict _src)
 {
 	static_assert(ByteSize > 0);
 	if constexpr (ByteSize > 256)
@@ -47,7 +47,7 @@ bool RingBuffer<Fast>::TryWrite(const std::byte* __restrict _src)
 	}
 }
 
-bool RingBuffer<Fast>::TryWrite(const std::byte* __restrict _src, size_t _len)
+bool RingBuffer<FastSPSC>::TryWrite(const std::byte* __restrict _src, size_t _len)
 {
 	if (_len == 0) [[unlikely]]
 		return true;
@@ -77,7 +77,7 @@ bool RingBuffer<Fast>::TryWrite(const std::byte* __restrict _src, size_t _len)
 	return true;
 }
 
-bool RingBuffer<Fast>::TryWrite(std::span<const std::byte> _src)
+bool RingBuffer<FastSPSC>::TryWrite(std::span<const std::byte> _src)
 {
 	size_t len = _src.size();
 
@@ -108,7 +108,7 @@ bool RingBuffer<Fast>::TryWrite(std::span<const std::byte> _src)
 }
 
 template<size_t ByteSize>
-bool RingBuffer<Fast>::TryRead(std::byte* __restrict _dest)
+bool RingBuffer<FastSPSC>::TryRead(std::byte* __restrict _dest)
 {
 	static_assert(ByteSize > 0);
 	if constexpr (ByteSize > 256)
@@ -142,7 +142,7 @@ bool RingBuffer<Fast>::TryRead(std::byte* __restrict _dest)
 	}
 }
 
-bool RingBuffer<Fast>::TryRead(std::byte* __restrict _dest, size_t _len)
+bool RingBuffer<FastSPSC>::TryRead(std::byte* __restrict _dest, size_t _len)
 {
 	if (_len == 0) [[unlikely]]
 		return true;
@@ -172,7 +172,7 @@ bool RingBuffer<Fast>::TryRead(std::byte* __restrict _dest, size_t _len)
 	return true;
 }
 
-bool RingBuffer<Fast>::TryRead(std::span<std::byte> _dest)
+bool RingBuffer<FastSPSC>::TryRead(std::span<std::byte> _dest)
 {
 	size_t len = _dest.size();
 
@@ -203,7 +203,7 @@ bool RingBuffer<Fast>::TryRead(std::span<std::byte> _dest)
 }
 
 template<size_t ByteSize>
-void RingBuffer<Fast>::ReadPreview(std::byte* __restrict _dest) const
+void RingBuffer<FastSPSC>::ReadPreview(std::byte* __restrict _dest) const
 {
 	static_assert(ByteSize > 0);
 	if constexpr (ByteSize > 256)
@@ -234,7 +234,7 @@ void RingBuffer<Fast>::ReadPreview(std::byte* __restrict _dest) const
 	}
 }
 
-void RingBuffer<Fast>::ReadPreview(std::byte* __restrict _dest, size_t _len) const
+void RingBuffer<FastSPSC>::ReadPreview(std::byte* __restrict _dest, size_t _len) const
 {
 	if (_len == 0) [[unlikely]]
 		return;
@@ -260,7 +260,7 @@ void RingBuffer<Fast>::ReadPreview(std::byte* __restrict _dest, size_t _len) con
 		Memory::Copy(_dest + first, buffer, _len - first);
 }
 
-void RingBuffer<Fast>::ReadPreview(std::span<std::byte> _dest) const
+void RingBuffer<FastSPSC>::ReadPreview(std::span<std::byte> _dest) const
 {
 	size_t len = _dest.size();
 
@@ -286,13 +286,13 @@ void RingBuffer<Fast>::ReadPreview(std::span<std::byte> _dest) const
 		Memory::Copy(dest + first, buffer, len - first);
 }
 
-void RingBuffer<Fast>::Clear()
+void RingBuffer<FastSPSC>::Clear()
 {
 	m_consumer.value = m_producer.value;
 	m_producer.cachedValue = m_consumer.cachedValue;
 }
 
-size_t RingBuffer<Fast>::Size() const noexcept
+size_t RingBuffer<FastSPSC>::Size() const noexcept
 {
 	const size_t t = m_producer.value;
 	const size_t h = m_consumer.value;

@@ -4,7 +4,30 @@ using namespace LyntraNet;
 
 bool Listener::Startup()
 {
-	return false;
+	SYSTEM_INFO sysInfo;
+	GetSystemInfo(&sysInfo);
+	size_t threadSize = static_cast<size_t>(sysInfo.dwNumberOfProcessors) * 2 + 1;
+
+	WSADATA wsaData;
+
+	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) return false;
+	if ((m_hComPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0)) == NULL) return false;
+	if ((m_listenSock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED)) == INVALID_SOCKET) return false;
+	CreateIoCompletionPort((HANDLE)m_listenSock, m_hComPort, (ULONG_PTR)0, 0);
+
+	memset(&m_listenAdr, 0, sizeof(m_listenAdr));
+
+	m_listenAdr.sin_family = AF_INET;
+	m_listenAdr.sin_addr.s_addr = htonl(INADDR_ANY);
+	m_listenAdr.sin_port = htons(8080);
+
+	if (::bind(m_listenSock, (PSOCKADDR)&m_listenAdr, sizeof(m_listenAdr)) == SOCKET_ERROR) return false;
+
+	if (listen(m_listenSock, 100) == SOCKET_ERROR) return false;
+
+	LoadAcceptEx();
+
+	for (int i = 0; i < 100; i++) PostAccept();
 }
 
 void Listener::LoadAcceptEx()
@@ -62,7 +85,7 @@ void Listener::OnAccept(Packet::PIOCONTEXT _context)
 	m_lpGetAcceptExSockaddrs(_context->m_wsaBuf[0].buf, 0, dwLen, dwLen,
 		(PSOCKADDR*)&localAdr, &localAdrLen, (PSOCKADDR*)&remoteAdr, &remoteAdrLen);
 
-	Network::NetworkClient* client = m_clientManager.AcquireClient();
+	Network::NetworkConnection* client = m_clientManager.AcquireClient();
 
 	client->AllocateSocket(
 		_context->m_socket,

@@ -13,7 +13,7 @@ struct MPSC {}; // Multi-Producer Single-Consumer
 struct SPMC {}; // Single-Producer Multi-Consumer
 struct MPMC {}; // Multi-Producer Multi-Consumer
 
-struct Fast {}; // Fast Single-Producer Single-Consumer (Non-atomic)
+struct FastSPSC {}; // Fast Single-Producer Single-Consumer (Non-atomic)
 struct ZeroCopy {}; // Zero-Copy
 
 template<typename T>
@@ -22,7 +22,7 @@ std::same_as<T, SPSC> ||
 std::same_as<T, MPSC> ||
 std::same_as<T, SPMC> ||
 std::same_as<T, MPMC> ||
-std::same_as<T, Fast> ||
+std::same_as<T, FastSPSC> ||
 std::same_as<T, ZeroCopy>;
 
 struct alignas(CACHE_SIZE) CacheLineAtomic

@@ -14,7 +14,7 @@ void Benchmark()
     constexpr size_t BufferSize = 65536;
     constexpr size_t Iteration = 10'000'000;
 
-    Utility::RingBuffer<Fast> rbuf(BufferSize);
+    Utility::RingBuffer<FastSPSC> rbuf(BufferSize);
 
     array<std::byte, DataSize> src{};
     array<std::byte, DataSize> dst{};

@@ -11,6 +11,9 @@
 
 namespace LyntraNet::Network::Socket
 {
+	typedef class NetworkSocket
+		NET_SOCK, * PNET_SOCK;
+
 	class NetworkSocket
 	{
 	public:

@@ -5,6 +5,8 @@
 
 #include "Utility/RingBuffer.h"
 #include "Utility/ConcurrentQueue.h"
+#include "Utility/ConcurrentStack.h"
+#include "Utility/ConcurrentHashMap.h"
 #include "Utility/LockFreePool.h"
 
 #endif
