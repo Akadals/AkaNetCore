@@ -5,21 +5,33 @@
 
 namespace LyntraNet::Utility
 {
-	template<typename T>
-	class LockFreePoolStatic
+	template<typename T, size_t Size = 0>
+	class LockFreePool;
+
+	template<typename T, size_t Size>
+	class LockFreePool
 	{
 	private:
 		ConcurrentStack<T, MPMC> m_stack;
 	public:
-		LockFreePoolStatic(size_t _size) : m_stack(_size) {}
-		T* Acquire();
-		void Release(T* _obj);
+		explicit LockFreePool() :
+			m_stack(Size) {};
+		T Acquire();
+		void Release(T&& _obj);
 	};
 	template<typename T>
-	class LockFreePoolDynamic
+	class LockFreePool<T, 0>
 	{
+	private:
+		size_t m_size;
+		size_t m_capacity;
 	public:
-		LockFreePoolDynamic(size_t _size);
+		LockFreePool(size_t _size) :
+			m_size(_size), m_capacity(_size) {};
+		T Acquire();
+		void Release(T&& _obj);
 	};
 }
+
+#include "Detail/LockFreePool.inl"
 #endif

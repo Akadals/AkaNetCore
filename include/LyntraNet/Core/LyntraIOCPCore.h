@@ -5,6 +5,7 @@ namespace LyntraNet
 {
 	class Core
 	{
-
+	private:
+		DWORD WINAPI Worker(PVOID args);
 	};
 }

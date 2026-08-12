@@ -12,8 +12,12 @@ namespace LyntraNet::Network::Socket
 	{
 		alignas(64) std::atomic<DWORD> m_ioCount = 0x80000000;
 		alignas(64) DWORD m_ioFlag = 0;
+
+		std::atomic<bool> m_isUseTLS = false;
 	public:
 		TCPSocket();
+		DWORD Read(Packet::IOCONTEXT& _context) override;
+		DWORD Write(Packet::IOCONTEXT& _context) override;
 	};
 }
 #endif

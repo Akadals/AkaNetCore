@@ -24,7 +24,8 @@ namespace LyntraNet::Network::Socket
 		IPAddress m_local;
 		IPAddress m_remote;
 	protected:
-		LockFreePoolStatic<Packet::IOCONTEXT> m_ioContextPool = { IO_CONTEXT_POOL_SIZE };
+		LockFreePool<Packet::IOCONTEXT*,
+			IO_CONTEXT_POOL_SIZE> m_ioContextPool;
 	public:
 		NetworkSocket() = default;
 
@@ -32,6 +33,8 @@ namespace LyntraNet::Network::Socket
 			SOCKET _socket, 
 			const SOCKADDR_IN& _localAddr,
 			const SOCKADDR_IN& _remoteAddr);
+		void Deallocate();
+		void CloseSocket() const { closesocket(m_sock); }
 
 		SOCKET GetSocket() const { return m_sock; }
 
@@ -41,7 +44,7 @@ namespace LyntraNet::Network::Socket
 		Packet::IOCONTEXT* AcquireContext() 
 		{ return m_ioContextPool.Acquire(); }
 		void ReleaseContext(Packet::IOCONTEXT* _context) 
-		{ m_ioContextPool.Release(_context); }
+		{ m_ioContextPool.Release(std::move(_context)); }
 
 		virtual DWORD Read(Packet::IOCONTEXT& _context) = 0;
 		virtual DWORD Write(Packet::IOCONTEXT& _context) = 0;

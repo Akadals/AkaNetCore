@@ -11,6 +11,14 @@
 
 namespace LyntraNet
 {
+	enum class Protocol
+	{
+		TCP,
+		TCPWithTLS,
+		UDP,
+		QUIC,
+		RUDP,
+	}; //temp
 	class Listener
 	{
 	private:
@@ -22,10 +30,10 @@ namespace LyntraNet
 		LPFN_ACCEPTEX m_lpAcceptEx = {};
 		LPFN_GETACCEPTEXSOCKADDRS m_lpGetAcceptExSockaddrs = {};
 
-		Network::ConnectionManager m_clientManager = {};
+		Network::ConnectionManager m_ConnectionManager = {};
 	public:
-		Listener() = default;
-		bool Startup();
+		Listener(Protocol _protocol = Protocol::TCP);
+		bool Startup(uint16_t _port = 9000);
 	private:
 		void LoadAcceptEx();
 		void PostAccept() const;

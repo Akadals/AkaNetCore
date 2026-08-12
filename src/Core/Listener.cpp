@@ -2,7 +2,20 @@
 
 using namespace LyntraNet;
 
-bool Listener::Startup()
+Listener::Listener(Protocol _protocol)
+{
+	switch (_protocol)
+	{
+	case Protocol::TCP:
+	case Protocol::TCPWithTLS:
+	case Protocol::UDP:
+	case Protocol::RUDP:
+	case Protocol::QUIC:
+	default: break;
+	}
+}
+
+bool Listener::Startup(uint16_t _port)
 {
 	SYSTEM_INFO sysInfo;
 	GetSystemInfo(&sysInfo);
@@ -19,7 +32,7 @@ bool Listener::Startup()
 
 	m_listenAdr.sin_family = AF_INET;
 	m_listenAdr.sin_addr.s_addr = htonl(INADDR_ANY);
-	m_listenAdr.sin_port = htons(8080);
+	m_listenAdr.sin_port = htons(_port);
 
 	if (::bind(m_listenSock, (PSOCKADDR)&m_listenAdr, sizeof(m_listenAdr)) == SOCKET_ERROR) return false;
 
@@ -85,7 +98,7 @@ void Listener::OnAccept(Packet::PIOCONTEXT _context)
 	m_lpGetAcceptExSockaddrs(_context->m_wsaBuf[0].buf, 0, dwLen, dwLen,
 		(PSOCKADDR*)&localAdr, &localAdrLen, (PSOCKADDR*)&remoteAdr, &remoteAdrLen);
 
-	Network::NetworkConnection* client = m_clientManager.AcquireClient();
+	Network::NetworkConnection* client = m_ConnectionManager.AcquireClient();
 
 	client->AllocateSocket(
 		_context->m_socket,

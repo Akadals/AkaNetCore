@@ -3,7 +3,7 @@
 
 #include <LyntraNet/Utility.h>
 #include <LyntraNet/Packet.h>
-#include <LyntraNet/Network/Transport/NetworkTransport.h>
+#include <LyntraNet/Network/Transport/ITransport.h>
 
 #include <WinSock2.h>
 #include <WS2tcpip.h>
@@ -21,10 +21,14 @@ namespace LyntraNet::Network
 		static const size_t RECV_BUF_SIZE = 8192;
 		static const size_t SEND_BUF_SIZE = 8192;
 	private:
-		std::unique_ptr<Transport::NetworkTransport> m_transport;
+		uint64_t connectionId;
+
+		std::unique_ptr<Transport::ITransport> m_transport;
 
 		RingBuffer<ZeroCopy> m_recvBuf = { RECV_BUF_SIZE };
 		RingBuffer<ZeroCopy> m_sendBuf = { SEND_BUF_SIZE };
+
+		DWORD m_timeoutTime;
 	public:
 		NetworkConnection() = default;
 

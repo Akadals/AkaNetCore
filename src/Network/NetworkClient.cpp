@@ -8,7 +8,8 @@ DWORD NetworkConnection::Read()
 		m_recvBuf.AcquireWriteRegion();
 	if (region.Empty()) return 0;
 
-	Packet::IOCONTEXT* ctx = m_sock->AcquireContext();
+	Packet::IOCONTEXT* ctx = 
+		m_transport->GetSocket().AcquireContext();
 
 	memset(&ctx->m_overlapped, 0, sizeof(OVERLAPPED));
 	ctx->m_ioType = Packet::IOTYPE::READING;
@@ -22,7 +23,7 @@ DWORD NetworkConnection::Read()
 	ctx->m_wsaBuf[1].len =
 		static_cast<ULONG>(region.secondSize);
 
-	return m_sock->Read(*ctx);
+	return m_transport->GetSocket().Read(*ctx);
 }
 
 DWORD NetworkConnection::Write()
