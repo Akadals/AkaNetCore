@@ -19,8 +19,7 @@ namespace LyntraNet::Network
 
 	};
 
-	class alignas(64) NetworkConnection : 
-		public std::enable_shared_from_this<NetworkConnection>
+	class alignas(64) NetworkConnection
 	{
 	public:
 		static const size_t RECV_BUF_SIZE = 8192;
@@ -38,13 +37,13 @@ namespace LyntraNet::Network
 	public:
 		NetworkConnection() = default;
 
-		void SetTransport(std::unique_ptr<Transport::ITransport> _transport)
+		void SetTransport(_In_ std::unique_ptr<Transport::ITransport> _transport)
 		{ m_transport = std::move(_transport); }
 
 		void Bind(
-			SOCKET _socket,
-			const SOCKADDR_IN& _localAddr,
-			const SOCKADDR_IN& _remoteAddr)
+			_In_ SOCKET _socket,
+			_In_ const SOCKADDR_IN& _localAddr,
+			_In_opt_ const SOCKADDR_IN& _remoteAddr)
 		{ m_transport->GetSocket().Bind(_socket, _localAddr, _remoteAddr); }
 
 		DWORD Read();

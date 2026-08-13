@@ -8,9 +8,7 @@
 
 #include <LyntraNet/Network/NetworkConnection.h>
 #include <LyntraNet/Network/ConnectionManager.h>
-
-#include "LyntraIOCPCore.h"
-
+#include <LyntraNet/Core/LyntraIOCPCore.h>
 #include <LyntraNet/Network/IOContext.h>
 
 namespace LyntraNet
@@ -43,13 +41,14 @@ namespace LyntraNet
 
 		IOCPCore core;
 	public:
-		Listener(Protocol _protocol = Protocol::TCP,
-			ProtocolOption _protocolOpt = {});
-		bool Startup(uint16_t _port = 9000);
+		Listener(
+			_In_opt_ Protocol _protocol = Protocol::TCP,
+			_In_opt_ ProtocolOption _protocolOpt = {});
+		bool Startup(_In_opt_ uint16_t _port = 9000);
 	private:
 		void LoadAcceptEx();
 		void PostAccept();
-		void OnAccept(Network::PIOCONTEXT _context);
+		void OnAccept(_In_ Network::PIOCONTEXT _context);
 	};
 }
 #endif

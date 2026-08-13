@@ -10,7 +10,9 @@ namespace LyntraNet::Network::Transport
 	private:
 		std::unique_ptr<Socket::NetworkSocket> m_sock;
 	public:
-		void SetSocket(std::unique_ptr<Socket::NetworkSocket> _socket);
+		void SetSocket(
+			_In_ std::unique_ptr<Socket::NetworkSocket> _socket
+		);
 		Socket::NetworkSocket& GetSocket() { return *m_sock; }
 		const Socket::NetworkSocket& GetSocket() const { return *m_sock; }
 	};

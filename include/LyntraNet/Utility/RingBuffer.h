@@ -27,19 +27,40 @@ namespace LyntraNet::Utility
 		RingBuffer<SPSC>(size_t _size);
 
 		template<size_t ByteSize>
-		bool TryWrite(const std::byte* __restrict _src);
-		bool TryWrite(const std::byte* __restrict _src, size_t _len);
-		bool TryWrite(std::span<const std::byte> _src);
+		bool TryWrite(
+			_In_reads_bytes_(ByteSize) const std::byte* __restrict _src
+		);
+		bool TryWrite(
+			_In_reads_bytes_(_len)	const std::byte* __restrict _src,
+			_In_					size_t _len
+		);
+		bool TryWrite(
+			_In_ std::span<const std::byte> _src
+		);
 
 		template<size_t ByteSize>
-		bool TryRead(std::byte* __restrict _dest);
-		bool TryRead(std::byte* __restrict _dest, size_t _len);
-		bool TryRead(std::span<std::byte> _dest);
+		bool TryRead(
+			_Out_writes_bytes_all_(ByteSize) std::byte* __restrict _dest
+		);
+		bool TryRead(
+			_Out_writes_bytes_all_(_len)	std::byte* __restrict _dest, 
+			_In_							size_t _len
+		);
+		bool TryRead(
+			_Out_ std::span<std::byte> _dest
+		);
 
 		template<size_t ByteSize>
-		void ReadPreview(std::byte* __restrict _dest) const;
-		void ReadPreview(std::byte* __restrict _dest, size_t _len) const;
-		void ReadPreview(std::span<std::byte> _dest) const;
+		void ReadPreview(
+			_Out_writes_bytes_all_(ByteSize) std::byte* __restrict _dest
+		) const;
+		void ReadPreview(
+			_Out_writes_bytes_all_(_len)	std::byte* __restrict _dest, 
+			_In_							size_t _len
+		) const;
+		void ReadPreview(
+			_Out_ std::span<std::byte> _dest
+		) const;
 
 		void Clear();
 
@@ -89,16 +110,33 @@ namespace LyntraNet::Utility
 		mutable CacheLineAtomic m_reserveTail;
 		mutable CacheLineAtomic m_publishTail;
 	public:
-		RingBuffer<MPMC>(size_t _size);
+		RingBuffer<MPMC>(
+			_In_ size_t _size
+		);
 
-		bool TryWrite(const std::byte* __restrict _src, size_t _len);
-		bool TryWrite(std::span<const std::byte> _src);
+		bool TryWrite(
+			_In_reads_bytes_(_len)	const std::byte* __restrict _src,
+			_In_					size_t _len
+		);
+		bool TryWrite(
+			_In_ std::span<const std::byte> _src
+		);
 
-		bool TryRead(std::byte* __restrict _dest, size_t _len);
-		bool TryRead(std::span<std::byte> _dest);
+		bool TryRead(
+			_Out_writes_bytes_all_(_len)	std::byte* __restrict _dest,
+			_In_							size_t _len
+		);
+		bool TryRead(
+			_Out_ std::span<std::byte> _dest
+		);
 
-		void ReadPreview(std::byte* __restrict _dest, size_t _len) const;
-		void ReadPreview(std::span<std::byte> _dest) const;
+		void ReadPreview(
+			_Out_writes_bytes_all_(_len)	std::byte* __restrict _dest,
+			_In_							size_t _len
+		) const;
+		void ReadPreview(
+			_Out_ std::span<std::byte> _dest
+		) const;
 
 		void Clear();
 
@@ -120,19 +158,40 @@ namespace LyntraNet::Utility
 		RingBuffer<FastSPSC>(size_t _size);
 
 		template<size_t ByteSize>
-		bool TryWrite(const std::byte* __restrict _src);
-		bool TryWrite(const std::byte* __restrict _src, size_t _len);
-		bool TryWrite(std::span<const std::byte> _src);
+		bool TryWrite(
+			_In_reads_bytes_(ByteSize) const std::byte* __restrict _src
+		);
+		bool TryWrite(
+			_In_reads_bytes_(_len)	const std::byte* __restrict _src,
+			_In_					size_t _len
+		);
+		bool TryWrite(
+			_In_ std::span<const std::byte> _src
+		);
 
 		template<size_t ByteSize>
-		bool TryRead(std::byte* __restrict _dest);
-		bool TryRead(std::byte* __restrict _dest, size_t _len);
-		bool TryRead(std::span<std::byte> _dest);
+		bool TryRead(
+			_Out_writes_bytes_all_(ByteSize) std::byte* __restrict _dest
+		);
+		bool TryRead(
+			_Out_writes_bytes_all_(_len)	std::byte* __restrict _dest, 
+			_In_							size_t _len
+		);
+		bool TryRead(
+			_Out_ std::span<std::byte> _dest
+		);
 
 		template<size_t ByteSize>
-		void ReadPreview(std::byte* __restrict _dest) const;
-		void ReadPreview(std::byte* __restrict _dest, size_t _len) const;
-		void ReadPreview(std::span<std::byte> _dest) const;
+		void ReadPreview(
+			_Out_writes_bytes_all_(ByteSize) std::byte* __restrict _dest
+		) const;
+		void ReadPreview(
+			_Out_writes_bytes_all_(_len)	std::byte* __restrict _dest,
+			_In_							size_t _len
+		) const;
+		void ReadPreview(
+			_Out_ std::span<std::byte> _dest
+		) const;
 
 		void Clear();
 
@@ -151,14 +210,16 @@ namespace LyntraNet::Utility
 			size_t secondSize = 0;
 
 			Region(
-				std::byte* _firstPtr,
-				size_t _firstSize,
-				std::byte* _secondPtr,
-				size_t _secondSize) :
+				_In_reads_bytes_(_firstSize)	std::byte* _firstPtr,
+				_In_							size_t _firstSize,
+				_In_reads_bytes_(_secondSize)	std::byte* _secondPtr,
+				_In_							size_t _secondSize
+				) :
 				firstPtr(_firstPtr),
 				firstSize(_firstSize),
 				secondPtr(_secondPtr),
-				secondSize(_secondSize) {}
+				secondSize(_secondSize
+				) {}
 
 			bool Empty() const
 			{
@@ -169,11 +230,12 @@ namespace LyntraNet::Utility
 		{
 			size_t writableSize = 0;
 			WriteRegion(
-				std::byte* _firstPtr,
-				size_t _firstSize,
-				std::byte* _secondPtr,
-				size_t _secondSize,
-				size_t _writableSize) :
+				_In_reads_bytes_(_firstSize)	std::byte* _firstPtr,
+				_In_							size_t _firstSize,
+				_In_reads_bytes_(_secondSize)	std::byte* _secondPtr,
+				_In_							size_t _secondSize,
+				_In_							size_t _writableSize
+			) :
 				Region(
 					_firstPtr,
 					_firstSize,
@@ -185,11 +247,12 @@ namespace LyntraNet::Utility
 		{
 			size_t readableSize = 0;
 			ReadRegion(
-				std::byte* _firstPtr,
-				size_t _firstSize,
-				std::byte* _secondPtr,
-				size_t _secondSize,
-				size_t _readableSize) :
+				_Out_writes_bytes_all_(_firstSize)	std::byte* _firstPtr,
+				_Out_								size_t _firstSize,
+				_Out_writes_bytes_all_(_secondSize) std::byte* _secondPtr,
+				_Out_								size_t _secondSize,
+				_Out_								size_t _readableSize
+			) :
 				Region(
 					_firstPtr,
 					_firstSize,
@@ -206,15 +269,21 @@ namespace LyntraNet::Utility
 		mutable CacheLineAtomic m_head;
 		mutable CacheLineAtomic m_tail;
 	public:
-		RingBuffer<ZeroCopy>(size_t _size);
+		RingBuffer<ZeroCopy>(
+			_In_ size_t _size
+		);
 
 		WriteRegion AcquireWriteRegion();
 		ReadRegion AcquireReadRegion();
 
-		void CommitWrite(size_t _size);
-		void CommitRead(size_t _size);
+		void CommitWrite(
+			_In_ size_t _size
+		);
+		void CommitRead(
+			_In_ size_t _size
+		);
 	};
-}
+} //namespace LyntraNet::Utility
 
 #include "Detail/RingBuffer/RingBufferSPSC.inl"
 #include "Detail/RingBuffer/RingBufferMPSC.inl"
@@ -222,4 +291,4 @@ namespace LyntraNet::Utility
 #include "Detail/RingBuffer/RingBufferMPMC.inl"
 #include "Detail/RingBuffer/RingBufferFastSPSC.inl"
 #include "Detail/RingBuffer/RingBufferZeroCopy.inl"
-#endif
+#endif //__INCL_LYNTRA_RING_BUFFER_H__

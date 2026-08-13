@@ -5,6 +5,7 @@
 #include <WS2tcpip.h>
 #include <mswsock.h>
 #include <mstcpip.h>
+#include <sal.h>
 
 #include <LyntraNet/Network/IPAddress.h>
 #include <LyntraNet/Utility.h>
@@ -20,8 +21,8 @@ namespace LyntraNet::Network::Socket
 	struct SocketOption
 	{
 		bool b_tcp_nodelay = true;
-		size_t st_so_rcvbuf_size = 8192;
-		size_t st_so_sndbuf_size = 8192;
+		int st_so_rcvbuf_size = 8192;
+		int st_so_sndbuf_size = 8192;
 		bool b_so_reuseaddr = true;
 		bool b_so_keepalive = true;
 		tcp_keepalive ka_vals =
@@ -38,7 +39,7 @@ namespace LyntraNet::Network::Socket
 	public:
 		static const size_t IO_CONTEXT_POOL_SIZE = 128;
 	protected:
-		SOCKET m_fd = INVALID_SOCKET;
+		SOCKET m_sock = INVALID_SOCKET;
 
 		IPAddress m_local;
 		IPAddress m_remote;
@@ -51,21 +52,30 @@ namespace LyntraNet::Network::Socket
 		NetworkSocket() = default;
 		virtual ~NetworkSocket();
 
-		NetworkSocket(NetworkSocket&&) noexcept;
-		NetworkSocket& operator=(NetworkSocket&&) noexcept;
+		NetworkSocket(
+			_In_ NetworkSocket&&
+		) noexcept;
+		NetworkSocket& operator=(
+			_In_ NetworkSocket&&
+			) noexcept;
 
-		NetworkSocket(const NetworkSocket&) = delete;
-		NetworkSocket& operator=(const NetworkSocket&) = delete;
+		NetworkSocket(
+			_In_ const NetworkSocket&
+		) = delete;
+		NetworkSocket& operator=(
+			_In_ const NetworkSocket&
+			) = delete;
 
-		void SetSocketOpt(SocketOption _sockOpt) { m_sockOpt = _sockOpt; }
+		void SetSocketOpt(SocketOption&& _sockOpt) { m_sockOpt = _sockOpt; }
 
 		void Bind(
-			SOCKET _socket, 
-			const SOCKADDR_IN& _localAddr,
-			const SOCKADDR_IN& _remoteAddr);
-		bool IsValid() const noexcept;
+			_In_ SOCKET _socket, 
+			_In_ const SOCKADDR_IN& _localAddr,
+			_In_opt_ const SOCKADDR_IN& _remoteAddr
+		);
+		bool IsValid() const noexcept { return m_sock != INVALID_SOCKET; }
 
-		SOCKET GetHandle() const noexcept { return m_fd; }
+		SOCKET GetHandle() const noexcept { return m_sock; }
 
 		const IPAddress& GetLocal() const { return m_local; }
 		const IPAddress& GetRemote() const { return m_remote; }
@@ -73,11 +83,16 @@ namespace LyntraNet::Network::Socket
 		IOCONTEXT* AcquireContext() 
 		{ return m_ioContextPool.Acquire(); }
 
-		void ReleaseContext(IOCONTEXT* _context) 
-		{ m_ioContextPool.Release(std::move(_context)); }
+		void ReleaseContext(
+			_In_ IOCONTEXT* _context
+		) { m_ioContextPool.Release(std::move(_context)); }
 
-		virtual DWORD Recv(IOCONTEXT& _context) = 0;
-		virtual DWORD Send(IOCONTEXT& _context) = 0;
+		virtual DWORD Recv(
+			_In_ IOCONTEXT& _context
+		) = 0;
+		virtual DWORD Send(
+			_In_ IOCONTEXT& _context
+		) = 0;
 		virtual void Close() noexcept = 0;
 	};
 }

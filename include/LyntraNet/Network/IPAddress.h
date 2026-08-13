@@ -4,6 +4,7 @@
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <string>
+#include <sal.h>
 
 namespace LyntraNet::Network
 {
@@ -15,7 +16,9 @@ namespace LyntraNet::Network
 	public:
 		IPAddress() = default;
 
-		void SetAddress(const sockaddr* _addr, socklen_t _len);
+		void SetAddress(
+			_In_reads_to_ptr_(_len) const sockaddr* _addr,
+			_In_ socklen_t _len);
 
 		ADDRESS_FAMILY Family() const;
 
@@ -28,8 +31,8 @@ namespace LyntraNet::Network
 		bool IsBroadcast() const;
 		bool IsMulticast() const;
 
-		bool operator==(const IPAddress&) const;
-		bool operator!=(const IPAddress&) const;
+		bool operator==(_In_ const IPAddress&) const;
+		bool operator!=(_In_ const IPAddress&) const;
 
 		const sockaddr* Data() const;
 		sockaddr* Data();
@@ -39,13 +42,15 @@ namespace LyntraNet::Network
 		std::string ToString() const;
 		std::string ToStringWithPort() const;
 
-		static IPAddress AnyIPv4(uint16_t _port);
-		static IPAddress AnyIPv6(uint16_t _port);
+		static IPAddress AnyIPv4(_In_ uint16_t _port);
+		static IPAddress AnyIPv6(_In_ uint16_t _port);
 
-		static IPAddress LoopbackIPv4(uint16_t _port);
-		static IPAddress LoopbackIPv6(uint16_t _port);
+		static IPAddress LoopbackIPv4(_In_ uint16_t _port);
+		static IPAddress LoopbackIPv6(_In_ uint16_t _port);
 
-		static IPAddress Parse(std::string_view _ip, uint16_t _port);
+		static IPAddress Parse(
+			_In_ std::string_view _ip, 
+			_In_ uint16_t _port);
 	};
 }
 #endif

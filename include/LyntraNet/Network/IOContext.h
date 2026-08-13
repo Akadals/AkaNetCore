@@ -1,3 +1,6 @@
+#ifndef __INCL_LYNTRA_IOCONTEXT_H__
+#define __INCL_LYNTRA_IOCONTEXT_H__
+
 #include <winsock2.h>
 
 namespace LyntraNet::Network
@@ -20,3 +23,4 @@ namespace LyntraNet::Network
 		void Init();
 	};
 }
+#endif
