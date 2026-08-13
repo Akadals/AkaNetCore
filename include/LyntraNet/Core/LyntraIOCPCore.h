@@ -3,7 +3,7 @@
 
 namespace LyntraNet
 {
-	class Core
+	class IOCPCore
 	{
 	private:
 		DWORD WINAPI Worker(PVOID args);

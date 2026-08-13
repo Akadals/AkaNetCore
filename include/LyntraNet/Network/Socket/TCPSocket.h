@@ -16,8 +16,8 @@ namespace LyntraNet::Network::Socket
 		std::atomic<bool> m_isUseTLS = false;
 	public:
 		TCPSocket();
-		DWORD Read(Packet::IOCONTEXT& _context) override;
-		DWORD Write(Packet::IOCONTEXT& _context) override;
+		DWORD Recv(Packet::IOCONTEXT& _context) override;
+		DWORD Send(Packet::IOCONTEXT& _context) override;
 	};
 }
 #endif

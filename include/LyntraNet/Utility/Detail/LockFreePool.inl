@@ -3,10 +3,7 @@ using namespace LyntraNet::Utility;
 template<typename T, size_t Size>
 T LockFreePool<T, Size>::Acquire()
 {
-	T temp{};
-	m_stack.Pop(temp);
-
-	return std::move(temp);
+	return T();
 }
 
 template<typename T, size_t Size>

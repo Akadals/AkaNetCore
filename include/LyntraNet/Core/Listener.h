@@ -9,16 +9,25 @@
 #include <LyntraNet/Network/NetworkConnection.h>
 #include <LyntraNet/Network/ConnectionManager.h>
 
+#include "LyntraIOCPCore.h"
+
+#include <LyntraNet/Network/IOContext.h>
+
 namespace LyntraNet
 {
 	enum class Protocol
 	{
 		TCP,
-		TCPWithTLS,
 		UDP,
 		QUIC,
-		RUDP,
-	}; //temp
+		KCP,
+	}; //임시 enum class
+
+	struct ProtocolOption
+	{
+		// 보안 및 세부 프로토콜 옵션 추가 (ex. SocketOption)
+	};
+
 	class Listener
 	{
 	private:
@@ -31,13 +40,16 @@ namespace LyntraNet
 		LPFN_GETACCEPTEXSOCKADDRS m_lpGetAcceptExSockaddrs = {};
 
 		Network::ConnectionManager m_ConnectionManager = {};
+
+		IOCPCore core;
 	public:
-		Listener(Protocol _protocol = Protocol::TCP);
+		Listener(Protocol _protocol = Protocol::TCP,
+			ProtocolOption _protocolOpt = {});
 		bool Startup(uint16_t _port = 9000);
 	private:
 		void LoadAcceptEx();
-		void PostAccept() const;
-		void OnAccept(Packet::PIOCONTEXT _context);
+		void PostAccept();
+		void OnAccept(Network::PIOCONTEXT _context);
 	};
 }
 #endif

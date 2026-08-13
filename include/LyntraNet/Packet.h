@@ -8,14 +8,9 @@
 
 namespace LyntraNet::Packet
 {
-	typedef enum class IOType : uint8_t
-	{ READING, WRITING, ACCEPT }
-	IOTYPE;
 
 	typedef struct Header
 		HEADER, * PHEADER;
-	typedef class IOContext
-		IOCONTEXT, * PIOCONTEXT;
 	typedef class Job
 		JOB, * PJOB;
 
@@ -26,18 +21,6 @@ namespace LyntraNet::Packet
 		uint32_t header = 0;
 	};
 	#pragma pack(pop)
-
-	class alignas(64) IOContext
-	{
-	public:
-		OVERLAPPED m_overlapped = {};
-		WSABUF m_wsaBuf[2] = {};
-		IOTYPE m_ioType = {};
-		SOCKET m_socket = { INVALID_SOCKET };
-	public:
-		IOContext();
-		void Init();
-	};
 
 	class alignas(64) Job
 	{

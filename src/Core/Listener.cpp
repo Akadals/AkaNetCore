@@ -2,14 +2,13 @@
 
 using namespace LyntraNet;
 
-Listener::Listener(Protocol _protocol)
+Listener::Listener(Protocol _protocol, ProtocolOption _protocolOpt)
 {
 	switch (_protocol)
 	{
 	case Protocol::TCP:
-	case Protocol::TCPWithTLS:
 	case Protocol::UDP:
-	case Protocol::RUDP:
+	case Protocol::KCP:
 	case Protocol::QUIC:
 	default: break;
 	}
@@ -57,11 +56,11 @@ void Listener::LoadAcceptEx()
 		reinterpret_cast<void**>(&m_lpGetAcceptExSockaddrs));
 }
 
-void Listener::PostAccept() const
+void Listener::PostAccept()
 {
-	Packet::PIOCONTEXT ctx = new Packet::IOCONTEXT();
+	auto ctx = m_ConnectionManager.AcquireAcceptCtx();
 
-	if ((ctx->m_socket = WSASocket(
+	if ((ctx->m_ownerFd = WSASocket(
 		AF_INET,
 		SOCK_STREAM,
 		0, NULL, 0,
@@ -71,20 +70,20 @@ void Listener::PostAccept() const
 		return; //loging
 	}
 
-	ctx->m_ioType = Packet::IOTYPE::ACCEPT;
+	ctx->m_ioType = Network::IOTYPE::ACCEPT;
 
 	DWORD bytes = 0;
 	DWORD dwLen = sizeof(SOCKADDR_IN) + 16;
 
-	if (!m_lpAcceptEx(m_listenSock, ctx->m_socket, ctx->m_wsaBuf[0].buf, 0,
+	if (!m_lpAcceptEx(m_listenSock, ctx->m_ownerFd, ctx->m_wsaBuf[0].buf, 0,
 		dwLen, dwLen, &bytes, &ctx->m_overlapped)) return; //loging
 }
 
-void Listener::OnAccept(Packet::PIOCONTEXT _context)
+void Listener::OnAccept(Network::PIOCONTEXT _context)
 {
 	int sockLen = sizeof(m_listenSock);
 
-	setsockopt(_context->m_socket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT,
+	setsockopt(_context->m_ownerFd, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT,
 		(char*)&m_listenSock, sizeof(m_listenSock));
 
 	SOCKADDR* localAdr = nullptr;
@@ -98,14 +97,18 @@ void Listener::OnAccept(Packet::PIOCONTEXT _context)
 	m_lpGetAcceptExSockaddrs(_context->m_wsaBuf[0].buf, 0, dwLen, dwLen,
 		(PSOCKADDR*)&localAdr, &localAdrLen, (PSOCKADDR*)&remoteAdr, &remoteAdrLen);
 
-	Network::NetworkConnection* client = m_ConnectionManager.AcquireClient();
+	auto connection = m_ConnectionManager.AcquireConnection();
+	auto transport = m_ConnectionManager.AcquireTransport();
 
-	client->AllocateSocket(
-		_context->m_socket,
+	transport->SetSocket(m_ConnectionManager.AcquireSocket());
+	connection->SetTransport(std::move(transport));
+
+	connection->Bind(
+		_context->m_ownerFd,
 		*reinterpret_cast<SOCKADDR_IN*>(localAdr),
 		*reinterpret_cast<SOCKADDR_IN*>(remoteAdr));
 
-	CreateIoCompletionPort((HANDLE)_context->m_socket, 0, NULL, 0);
+	CreateIoCompletionPort((HANDLE)_context->m_ownerFd, 0, NULL, 0);
 
 	PostAccept();
 

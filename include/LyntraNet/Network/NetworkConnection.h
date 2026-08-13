@@ -2,8 +2,8 @@
 #define __INCL_LYNTRA_NETWORK_CONNECTION_H__
 
 #include <LyntraNet/Utility.h>
-#include <LyntraNet/Packet.h>
 #include <LyntraNet/Network/Transport/ITransport.h>
+#include <LyntraNet/Network/Transport/TCPTransport.h>
 
 #include <WinSock2.h>
 #include <WS2tcpip.h>
@@ -13,6 +13,11 @@ namespace LyntraNet::Network
 {
 	typedef class NetworkConnection
 		NET_CONNECTION, * PNET_CONNECTION;
+
+	struct ConnectionStats
+	{
+
+	};
 
 	class alignas(64) NetworkConnection : 
 		public std::enable_shared_from_this<NetworkConnection>
@@ -29,16 +34,18 @@ namespace LyntraNet::Network
 		RingBuffer<ZeroCopy> m_sendBuf = { SEND_BUF_SIZE };
 
 		DWORD m_timeoutTime;
+		ConnectionStats m_stats;
 	public:
 		NetworkConnection() = default;
 
-		void AllocateSocket(
+		void SetTransport(std::unique_ptr<Transport::ITransport> _transport)
+		{ m_transport = std::move(_transport); }
+
+		void Bind(
 			SOCKET _socket,
 			const SOCKADDR_IN& _localAddr,
 			const SOCKADDR_IN& _remoteAddr)
-		{
-			//m_sock->Allocate(_socket, _localAddr, _remoteAddr);
-		}
+		{ m_transport->GetSocket().Bind(_socket, _localAddr, _remoteAddr); }
 
 		DWORD Read();
 		DWORD Write();
