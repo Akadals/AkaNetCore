@@ -20,10 +20,12 @@ namespace LyntraNet::Network::Socket
 
 	struct SocketOption
 	{
-		bool b_tcp_nodelay = true;
 		int st_so_rcvbuf_size = 8192;
 		int st_so_sndbuf_size = 8192;
 		bool b_so_reuseaddr = true;
+
+#pragma region TCP
+		bool b_tcp_nodelay = true;
 		bool b_so_keepalive = true;
 		tcp_keepalive ka_vals =
 		{
@@ -31,6 +33,7 @@ namespace LyntraNet::Network::Socket
 			.keepalivetime = 30000,
 			.keepaliveinterval = 5000
 		};
+#pragma endregion
 		SocketOption() = default;
 	};
 
@@ -52,19 +55,11 @@ namespace LyntraNet::Network::Socket
 		NetworkSocket() = default;
 		virtual ~NetworkSocket();
 
-		NetworkSocket(
-			_In_ NetworkSocket&&
-		) noexcept;
-		NetworkSocket& operator=(
-			_In_ NetworkSocket&&
-			) noexcept;
+		NetworkSocket(NetworkSocket&&) noexcept;
+		NetworkSocket& operator=(NetworkSocket&&) noexcept;
 
-		NetworkSocket(
-			_In_ const NetworkSocket&
-		) = delete;
-		NetworkSocket& operator=(
-			_In_ const NetworkSocket&
-			) = delete;
+		NetworkSocket(const NetworkSocket&) = delete;
+		NetworkSocket& operator=(const NetworkSocket&) = delete;
 
 		void SetSocketOpt(SocketOption&& _sockOpt) { m_sockOpt = _sockOpt; }
 

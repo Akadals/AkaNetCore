@@ -210,10 +210,10 @@ namespace LyntraNet::Utility
 			size_t secondSize = 0;
 
 			Region(
-				_In_reads_bytes_(_firstSize)	std::byte* _firstPtr,
-				_In_							size_t _firstSize,
-				_In_reads_bytes_(_secondSize)	std::byte* _secondPtr,
-				_In_							size_t _secondSize
+				_Out_writes_bytes_all_(_firstSize)	std::byte* _firstPtr,
+				_Out_								size_t _firstSize,
+				_Out_writes_bytes_all_(_secondSize)	std::byte* _secondPtr,
+				_Out_								size_t _secondSize
 				) :
 				firstPtr(_firstPtr),
 				firstSize(_firstSize),
@@ -230,11 +230,11 @@ namespace LyntraNet::Utility
 		{
 			size_t writableSize = 0;
 			WriteRegion(
-				_In_reads_bytes_(_firstSize)	std::byte* _firstPtr,
-				_In_							size_t _firstSize,
-				_In_reads_bytes_(_secondSize)	std::byte* _secondPtr,
-				_In_							size_t _secondSize,
-				_In_							size_t _writableSize
+				_Out_writes_bytes_all_(_firstSize)	std::byte* _firstPtr,
+				_Out_								size_t _firstSize,
+				_Out_writes_bytes_all_(_secondSize) std::byte* _secondPtr,
+				_Out_								size_t _secondSize,
+				_Out_								size_t _writableSize
 			) :
 				Region(
 					_firstPtr,

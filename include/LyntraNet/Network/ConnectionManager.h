@@ -8,8 +8,8 @@
 
 #include <LyntraNet/Network/IOContext.h>
 
-#define U_P std::unique_ptr
-#define S_P std::shared_ptr
+#define U_PTR std::unique_ptr
+#define S_PTR std::shared_ptr
 
 namespace LyntraNet::Network
 {
@@ -21,11 +21,11 @@ namespace LyntraNet::Network
 		static const size_t ACCEPT_CONTEXT_POOL_SIZE = 100;
 		static const size_t JOB_POOL_SIZE = 65565;
 	private:
-		LockFreePool<S_P<NET_CONNECTION>>
+		LockFreePool<S_PTR<NET_CONNECTION>>
 			m_connectionPool = { CONNECTION_POOL_SIZE };
-		LockFreePool<U_P<Transport::ITransport>>
+		LockFreePool<U_PTR<Transport::ITransport>>
 			m_transportPool = { CONNECTION_POOL_SIZE };
-		LockFreePool<U_P<Socket::NET_SOCK>>
+		LockFreePool<U_PTR<Socket::NET_SOCK>>
 			m_socketPool = { CONNECTION_POOL_SIZE };
 
 		LockFreePool<PIOCONTEXT, ACCEPT_CONTEXT_POOL_SIZE>
@@ -34,7 +34,7 @@ namespace LyntraNet::Network
 		//LockFreePool<Packet::JOB> m_JobPool = { JOB_POOL_SIZE };
 
 #pragma region Network Session
-		ConcurrentHashMap<uint64_t, U_P<NET_CONNECTION>, MPSC>
+		ConcurrentHashMap<uint64_t, U_PTR<NET_CONNECTION>, MPSC>
 			m_connections;
 		ConcurrentHashMap<SOCKET, uint64_t, MPSC>
 			m_socketMap;
@@ -48,11 +48,11 @@ namespace LyntraNet::Network
 #pragma endregion
 	public:
 		ConnectionManager();
-		S_P<NET_CONNECTION> AcquireConnection() 
+		S_PTR<NET_CONNECTION> AcquireConnection() 
 		{ return m_connectionPool.Acquire(); }
-		U_P<Transport::ITransport> AcquireTransport()
+		U_PTR<Transport::ITransport> AcquireTransport()
 		{ return m_transportPool.Acquire(); }
-		U_P<Socket::NET_SOCK> AcquireSocket()
+		U_PTR<Socket::NET_SOCK> AcquireSocket()
 		{ return m_socketPool.Acquire(); }
 		PIOCONTEXT AcquireAcceptCtx()
 		{ return m_acceptCtxPool.Acquire(); }

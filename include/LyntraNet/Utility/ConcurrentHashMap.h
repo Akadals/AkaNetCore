@@ -28,7 +28,8 @@ namespace LyntraNet::Utility
 	template<typename Key, typename Value>
 	class ConcurrentHashMap<Key, Value, MPMC>
 	{
-
+	public:
+		void Add(Key _key, Value _value); //юс╫ц
 	};
 }
 

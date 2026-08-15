@@ -10,6 +10,7 @@
 #include <LyntraNet/Network/ConnectionManager.h>
 #include <LyntraNet/Core/LyntraIOCPCore.h>
 #include <LyntraNet/Network/IOContext.h>
+#include <LyntraNet/Network/IPEndPoint.h>
 
 namespace LyntraNet
 {
@@ -23,32 +24,32 @@ namespace LyntraNet
 
 	struct ProtocolOption
 	{
-		// 보안 및 세부 프로토콜 옵션 추가 (ex. SocketOption)
+		Network::Socket::SocketOption m_sockOpt;
 	};
 
 	class Listener
 	{
 	private:
-		HANDLE m_hComPort = {};
+		Protocol m_protocol = Protocol::TCP;
+		Network::IPEndPoint m_endpoint = {};
 
 		SOCKET m_listenSock = { INVALID_SOCKET };
 		SOCKADDR_IN m_listenAdr = {};
 
 		LPFN_ACCEPTEX m_lpAcceptEx = {};
 		LPFN_GETACCEPTEXSOCKADDRS m_lpGetAcceptExSockaddrs = {};
-
-		Network::ConnectionManager m_ConnectionManager = {};
-
-		IOCPCore core;
 	public:
 		Listener(
-			_In_opt_ Protocol _protocol = Protocol::TCP,
-			_In_opt_ ProtocolOption _protocolOpt = {});
-		bool Startup(_In_opt_ uint16_t _port = 9000);
+			_In_ Protocol _protocol = Protocol::TCP,
+			_In_ ProtocolOption _option = {}
+		);
+		void Bind(Network::IPEndPoint _endPoint);
+		Protocol GetProtocol() const noexcept { return m_protocol; }
+		SOCKET* GetSocket() { return &m_listenSock; }
+		SOCKADDR_IN* GetSockAdr() { return &m_listenAdr; }
 	private:
 		void LoadAcceptEx();
 		void PostAccept();
-		void OnAccept(_In_ Network::PIOCONTEXT _context);
 	};
 }
 #endif
