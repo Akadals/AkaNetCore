@@ -5,51 +5,56 @@
 #include <Windows.h>
 #include <MSWSock.h>
 #include <ws2tcpip.h>
-
-#include <LyntraNet/Network/NetworkConnection.h>
 #include <LyntraNet/Network/ConnectionManager.h>
-#include <LyntraNet/Core/LyntraIOCPCore.h>
 #include <LyntraNet/Network/IOContext.h>
 #include <LyntraNet/Network/IPEndPoint.h>
+#include <LyntraNet/Network/Protocol.h>
 
 namespace LyntraNet
 {
-	enum class Protocol
+	class ListenerBase
 	{
-		TCP,
-		UDP,
-		QUIC,
-		KCP,
-	}; //юс╫ц enum class
-
-	struct ProtocolOption
-	{
-		Network::Socket::SocketOption m_sockOpt;
+	protected:
+		SOCKET m_listenSock = { INVALID_SOCKET };
+		Network::IPEndPoint m_localEndpoint = {};
+	public:
+		ListenerBase(const Network::IPEndPoint _endpoint)
+		{ m_localEndpoint = _endpoint; }
+		virtual bool Start() = 0;
 	};
 
-	class Listener
+	template<TProtocol>
+	class Listener;
+
+	template<>
+	class Listener<TCP> : public ListenerBase
 	{
 	private:
-		Protocol m_protocol = Protocol::TCP;
-		Network::IPEndPoint m_endpoint = {};
-
-		SOCKET m_listenSock = { INVALID_SOCKET };
-		SOCKADDR_IN m_listenAdr = {};
-
 		LPFN_ACCEPTEX m_lpAcceptEx = {};
 		LPFN_GETACCEPTEXSOCKADDRS m_lpGetAcceptExSockaddrs = {};
 	public:
-		Listener(
-			_In_ Protocol _protocol = Protocol::TCP,
-			_In_ ProtocolOption _option = {}
-		);
-		void Bind(Network::IPEndPoint _endPoint);
-		Protocol GetProtocol() const noexcept { return m_protocol; }
-		SOCKET* GetSocket() { return &m_listenSock; }
-		SOCKADDR_IN* GetSockAdr() { return &m_listenAdr; }
+		Listener<TCP>(const Network::IPEndPoint _endpoint) :
+			ListenerBase(_endpoint) {}
+
+		void Listen(size_t _size);
 	private:
 		void LoadAcceptEx();
 		void PostAccept();
+	};
+	template<>
+	class Listener<UDP> : public ListenerBase
+	{
+
+	};
+	template<>
+	class Listener<QUIC> : public ListenerBase
+	{
+
+	};
+	template<>
+	class Listener<KCP> : public ListenerBase
+	{
+
 	};
 }
 #endif

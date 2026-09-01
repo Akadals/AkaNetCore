@@ -3,6 +3,6 @@
 
 #include <LyntraNet/Utility.h>
 #include <LyntraNet/Core/Listener.h>
-#include <LyntraNet/Core/LyntraIOCPCore.h>
+#include <LyntraNet/Core/LyntraServer.h>
 
 #endif

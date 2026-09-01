@@ -145,27 +145,27 @@ std::string IPAddress::ToStringWithPort() const
 	return ToString() + ":" + std::to_string(Port());
 }
 
-IPAddress IPAddress::AnyIPv4(uint16_t _port)
+IPAddress IPAddress::AnyIPv4()
 {
 	return IPAddress();
 }
 
-IPAddress IPAddress::AnyIPv6(uint16_t _port)
+IPAddress IPAddress::AnyIPv6()
 {
 	return IPAddress();
 }
 
-IPAddress IPAddress::LoopbackIPv4(uint16_t _port)
+IPAddress IPAddress::LoopbackIPv4()
 {
 	return IPAddress();
 }
 
-IPAddress IPAddress::LoopbackIPv6(uint16_t _port)
+IPAddress IPAddress::LoopbackIPv6()
 {
 	return IPAddress();
 }
 
-IPAddress IPAddress::Parse(std::string_view _ip, uint16_t _port)
+IPAddress IPAddress::Parse(std::string_view _ip)
 {
 	return IPAddress();
 }

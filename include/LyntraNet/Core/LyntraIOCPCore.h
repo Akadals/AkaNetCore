@@ -8,21 +8,7 @@
 
 namespace LyntraNet
 {
-	class Core
-	{
-	private:
-		HANDLE m_iocp;
-
-		std::vector<std::unique_ptr<Listener>> m_listener;
-		Network::ConnectionManager m_connectionManager;
-
-		std::atomic<bool> isRunning = false;
-	public:
-		Core();
-		void Startup();
-	private:
-		DWORD WINAPI Worker(PVOID args);
-	};
+	
 }
 #endif
 

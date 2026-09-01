@@ -16,6 +16,8 @@ namespace LyntraNet::Network
 	public:
 		IPAddress() = default;
 
+		explicit IPAddress(std::string_view _ip) { Parse(_ip); }
+
 		void SetAddress(
 			_In_reads_to_ptr_(_len) const sockaddr* _addr,
 			_In_ socklen_t _len);
@@ -41,14 +43,16 @@ namespace LyntraNet::Network
 
 		std::string ToString() const;
 		std::string ToStringWithPort() const;
+	public:
+		static IPAddress AnyIPv4();
+		static IPAddress AnyIPv6();
 
-		static IPAddress AnyIPv4(uint16_t _port);
-		static IPAddress AnyIPv6(uint16_t _port);
+		static uint16_t AnyPort() { return 0; }
 
-		static IPAddress LoopbackIPv4(uint16_t _port);
-		static IPAddress LoopbackIPv6(uint16_t _port);
+		static IPAddress LoopbackIPv4();
+		static IPAddress LoopbackIPv6();
 
-		static IPAddress Parse(std::string_view _ip, uint16_t _port);
+		static IPAddress Parse(std::string_view _ip);
 	};
 }
 #endif
